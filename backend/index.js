@@ -53,34 +53,40 @@ app.use('/api/', limiter);
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/technical_event';
-mongoose.connect(MONGO_URI)
-    .then(async () => {
-        console.log('MongoDB Connected');
-        // Seed default event if none exist
-        const eventCount = await Event.countDocuments();
-        if (eventCount === 0) {
-            const defaultEvent = new Event({
-                eventId: 'default-symposium-2026',
-                name: 'Technical Symposium 2026',
-                description: 'Initial symposium event for technical evaluation and management testing.',
-                startDate: new Date(),
-                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-                venue: 'Main Auditorium',
-                settings: {
-                    eventStatus: 'Open',
-                    minMembers: 1,
-                    maxMembers: 5,
-                    registrationType: 'Team',
-                    isPaidEvent: false
-                }
-            });
-            await defaultEvent.save();
-            console.log('Default event seeded for testing');
-        }
-        const PORT = process.env.PORT || 5000;
-        app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
-    })
-    .catch(err => console.log('MongoDB Connection Error:', err));
+
+// Bind port IMMEDIATELY so Render doesn't timeout
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+    
+    // Connect to MongoDB after starting server
+    mongoose.connect(MONGO_URI)
+        .then(async () => {
+            console.log('MongoDB Connected');
+            // Seed default event if none exist
+            const eventCount = await Event.countDocuments();
+            if (eventCount === 0) {
+                const defaultEvent = new Event({
+                    eventId: 'default-symposium-2026',
+                    name: 'Technical Symposium 2026',
+                    description: 'Initial symposium event for technical evaluation and management testing.',
+                    startDate: new Date(),
+                    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+                    venue: 'Main Auditorium',
+                    settings: {
+                        eventStatus: 'Open',
+                        minMembers: 1,
+                        maxMembers: 5,
+                        registrationType: 'Team',
+                        isPaidEvent: false
+                    }
+                });
+                await defaultEvent.save();
+                console.log('Default event seeded for testing');
+            }
+        })
+        .catch(err => console.error('MongoDB Connection Error. Please check your Atlas IP Whitelist:', err));
+});
 
 // Models
 const User = require('./models/User');
