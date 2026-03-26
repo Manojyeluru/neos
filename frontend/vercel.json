@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://neos-backend-xyz.onrender.com/api/:path*"
+      "destination": "https://neos-sizq.onrender.com/api/:path*"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://neos-backend-xyz.onrender.com/uploads/:path*"
+      "destination": "https://neos-sizq.onrender.com/uploads/:path*"
     },
     {
       "source": "/(.*)",
