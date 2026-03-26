@@ -43,13 +43,14 @@ A comprehensive, production-ready platform designed for managing technical hacka
 ## 📁 Project Structure
 
 ```text
-├── server/               # Node.js backend
+├── backend/              # Node.js backend
 │   ├── models/           # Mongoose schemas (User, Team, Problem, etc.)
 │   ├── routes/           # API endpoints
 │   ├── uploads/          # Local storage for uploaded files
 │   └── index.js          # Entry point
-├── src/                  # React frontend
-│   ├── app/
+├── frontend/             # React frontend
+│   ├── src/
+│   │   ├── app/
 │   │   ├── components/   # Modular UI components (Admin, Reviewer, Team Leader)
 │   │   ├── routes.ts     # Frontend routing configuration
 │   │   └── Root.tsx      # Main application layout
@@ -64,9 +65,9 @@ A comprehensive, production-ready platform designed for managing technical hacka
 - MongoDB (Local or Atlas)
 
 ### 1. Backend Setup
-1. Navigate to the server directory:
+1. Navigate to the backend directory:
    ```bash
-   cd server
+   cd backend
    ```
 2. Install dependencies:
    ```bash
@@ -84,9 +85,9 @@ A comprehensive, production-ready platform designed for managing technical hacka
    ```
 
 ### 2. Frontend Setup
-1. Navigate to the root directory:
+1. Navigate to the frontend directory:
    ```bash
-   cd ..
+   cd frontend
    ```
 2. Install dependencies:
    ```bash
