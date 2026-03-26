@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
-require('dotenv').config({ path: 'server/.env' });
+require('dotenv').config({ path: '.env' });
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/technical_event')
   .then(async () => {
-    const Voter = require('./server/models/Voter');
-    const Team = require('./server/models/Team');
-    const Event = require('./server/models/Event');
+    const Voter = require('./models/Voter');
+    const Team = require('./models/Team');
+    const Event = require('./models/Event');
 
     const eventId = (await Event.findOne())._id;
     console.log('EventId:', eventId);
