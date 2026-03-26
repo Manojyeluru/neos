@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router';
+import { API_BASE_URL } from '../../utils/api';
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const ForgotPassword: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+            const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),

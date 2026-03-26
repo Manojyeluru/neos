@@ -1,6 +1,6 @@
 // Use a relative path so the Vite dev-server proxy (→ port 5000) handles it.
 // This avoids CORS issues and works regardless of hostname differences.
-const API_BASE_URL = '/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
 
 export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('token');

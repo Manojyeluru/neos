@@ -21,7 +21,7 @@ import {
     Unlock,
     Lock
 } from "lucide-react";
-import { fetchApi } from "../../utils/api";
+import { fetchApi, API_BASE_URL } from "../../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function EventsManagement() {
@@ -93,7 +93,7 @@ export function EventsManagement() {
             if (clubLogo) data.append('clubLogo', clubLogo);
             if (eventPoster) data.append('eventPoster', eventPoster);
 
-            const response = await fetch(`http://127.0.0.1:5000/api/admin/events`, {
+            const response = await fetch(`${API_BASE_URL}/admin/events`, {
                 method: "POST",
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -129,7 +129,7 @@ export function EventsManagement() {
             const updatedSettings = { ...event.settings, [key]: value };
             data.append('settings', JSON.stringify(updatedSettings));
 
-            const response = await fetch(`http://127.0.0.1:5000/api/admin/events`, {
+            const response = await fetch(`${API_BASE_URL}/admin/events`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -152,7 +152,7 @@ export function EventsManagement() {
         if (!window.confirm("CRITICAL WARNING: Are you sure you want to permanently delete this event and ALL its associated data (teams, users, scores)? This action CANNOT be undone.")) return;
         
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/admin/events/${eventId}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/events/${eventId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
