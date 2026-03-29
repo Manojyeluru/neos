@@ -291,9 +291,12 @@ router.post('/register/team-leader', async (req, res) => {
                     );
                 }
             });
-            await Promise.all(emailPromises);
+            // Fire and forget emails to prevent server hanging
+            Promise.all(emailPromises).catch(mailErr => {
+                console.error('Background Mail Error:', mailErr);
+            });
         } catch (mailErr) {
-            console.error('Mail Error:', mailErr);
+            console.error('Mail Setup Error:', mailErr);
         }
 
         res.status(201).json({
