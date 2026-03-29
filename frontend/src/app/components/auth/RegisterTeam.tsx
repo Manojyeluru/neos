@@ -469,18 +469,25 @@ const RegisterTeam: React.FC = () => {
                                         </div>
 
                                         <div className="flex gap-4 pt-12">
-                                            <button type="button" onClick={() => setStep(1)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all">BACK</button>
+                                            <button type="button" onClick={() => setStep(1)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all disabled:opacity-50" disabled={loading}>BACK</button>
                                             <button
-                                                type="button" onClick={() => {
+                                                type={participationMode === 'solo' && !settings.isPaidEvent ? "submit" : "button"}
+                                                onClick={(e) => {
                                                     if (participationMode === 'solo') {
-                                                        settings.isPaidEvent ? setStep(3.5) : handleRegister({ preventDefault: () => {} } as any);
+                                                        if (settings.isPaidEvent) setStep(3.5);
+                                                        // if not paid, type="submit" will handle the submission natively
                                                     } else {
                                                         setStep(3);
                                                     }
                                                 }}
-                                                className="flex-1 bg-primary text-white font-black text-lg rounded-2xl transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                                                disabled={loading}
+                                                className="flex-1 bg-primary text-white font-black text-lg rounded-2xl transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0"
                                             >
-                                                {participationMode === 'solo' ? (settings.isPaidEvent ? 'PROCEED TO PAYMENT' : 'REGISTER NOW') : 'CONTINUE'}
+                                                {loading && participationMode === 'solo' && !settings.isPaidEvent ? (
+                                                    <Loader2 className="animate-spin h-6 w-6" />
+                                                ) : (
+                                                    participationMode === 'solo' ? (settings.isPaidEvent ? 'PROCEED TO PAYMENT' : 'REGISTER NOW') : 'CONTINUE'
+                                                )}
                                             </button>
                                         </div>
                                     </motion.div>
