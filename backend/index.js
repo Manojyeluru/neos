@@ -1,12 +1,23 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+console.log('Environment setup:', { 
+    hasUser: !!process.env.EMAIL_USER, 
+    hasPass: !!process.env.EMAIL_PASS,
+    nodeEnv: process.env.NODE_ENV 
+});
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const multer = require('multer');
 const xlsx = require('xlsx');
-const path = require('path');
-
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const authMiddleware = require('./middleware/authMiddleware');
+const Event = require('./models/Event');
+const User = require('./models/User');
+const Team = require('./models/Team');
+const ProblemStatement = require('./models/ProblemStatement');
 
 const app = express();
 

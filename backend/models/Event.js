@@ -27,6 +27,10 @@ const EventSchema = new mongoose.Schema({
         isProjectUploadOpen: { type: Boolean, default: false },
         isVotingOpen: { type: Boolean, default: false },
         whatsappLink: { type: String },
+        emailSettings: {
+            user: { type: String },
+            pass: { type: String }
+        },
         paymentDetails: {
             upiId: { type: String },
             bankName: { type: String },

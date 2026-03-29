@@ -278,16 +278,9 @@ router.post('/register/team-leader', async (req, res) => {
                         <a href="${settings.whatsappLink}" style="padding: 10px 20px; background-color: #25D366; color: white; border-radius: 5px; text-decoration: none; display: inline-block;">Join WhatsApp Group</a>`;
                     }
 
-                    return sendEmail(
-                        member.email,
-                        `Registration Successful - ${event.name}`,
-                        `<h1>Welcome, ${member.name}!</h1>
-                        <p>You have successfully registered for <b>${event.name}</b>. Your unique Team ID is <b>${uniqueId}</b>, and your team name is <b>${newTeam.teamName}</b>.</p>
-                        <br/>
-                        <p><b>MANDATORY:</b> Please register your Face ID to ensure your attendance is detected successfully during the event phase.</p>
-                        <a href="${faceScanLink}" style="padding: 10px 20px; background-color: #3b82f6; color: white; border-radius: 5px; text-decoration: none; display: inline-block;">Complete Face ID Scan</a>
                         <br/><br/><p>If the button doesn't work, copy and paste this link in your browser: <br/>${faceScanLink}</p>
-                        ${whatsappSection}`
+                        ${whatsappSection}`,
+                        settings.emailSettings
                     );
                 }
                 return Promise.resolve();
@@ -452,7 +445,7 @@ router.post('/reviewer-login', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate('eventId');
         if (!user) return res.status(404).json({ message: 'User with this email does not exist' });
 
         // Generate Token
@@ -466,7 +459,8 @@ router.post('/forgot-password', async (req, res) => {
         await sendEmail(
             email,
             'Password Reset Request',
-            `<p>You requested a password reset. Please click the link below to reset your password. This link expires in 15 minutes.</p><a href="${resetUrl}">${resetUrl}</a>`
+            `<p>You requested a password reset. Please click the link below to reset your password. This link expires in 15 minutes.</p><a href="${resetUrl}">${resetUrl}</a>`,
+            user.eventId?.settings?.emailSettings
         );
 
         res.json({ message: 'Reset email sent' });

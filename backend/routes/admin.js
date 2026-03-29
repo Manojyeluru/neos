@@ -48,14 +48,16 @@ router.post('/events', eventUpload, async (req, res) => {
         const { eventId, name, description, startDate, endDate, venue, settings } = req.body;
         const parsedSettings = typeof settings === 'string' ? JSON.parse(settings) : settings;
 
-        const updateData = {
-            name,
-            description,
-            startDate,
-            endDate,
-            venue,
-            settings: parsedSettings
-        };
+        // Build the update object with only provided fields to prevent accidental overwrites
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (venue !== undefined) updateData.venue = venue;
+        if (parsedSettings !== undefined) updateData.settings = parsedSettings;
+        
+        // Only include dates if they are provided (prevent null/invalid date conversion if empty)
+        if (startDate) updateData.startDate = startDate;
+        if (endDate) updateData.endDate = endDate;
 
         if (req.files) {
             if (req.files['clubLogo']) {
@@ -68,11 +70,14 @@ router.post('/events', eventUpload, async (req, res) => {
 
         const event = await Event.findOneAndUpdate(
             { eventId },
-            updateData,
+            { $set: updateData }, // Explicitly use $set to be safe, though Mongoose does this by default
             { upsert: true, new: true }
         );
         res.json(event);
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) { 
+        console.error("Event update error:", err);
+        res.status(500).json({ message: err.message }); 
+    }
 });
 
 router.get('/events/:id', async (req, res) => {
@@ -527,7 +532,7 @@ router.post('/add-reviewer', async (req, res) => {
                     <p style="color: #666; font-size: 12px;">This link will expire in 7 days.</p>
                 </div>
             `;
-            await sendEmail(email, 'Your Reviewer Access Credentials - Technical Symposium 2026', html);
+            await sendEmail(email, 'Your Reviewer Access Credentials - Technical Symposium 2026', html, req.event?.settings?.emailSettings);
         }
 
         res.json({ message: 'Reviewer added successfully', uniqueId, id: reviewer._id });
