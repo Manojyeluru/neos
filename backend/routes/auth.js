@@ -290,13 +290,21 @@ router.post('/register/team-leader', async (req, res) => {
                         ${whatsappSection}`
                     );
                 }
+                return Promise.resolve();
             });
-            // Fire and forget emails to prevent server hanging
-            Promise.all(emailPromises).catch(mailErr => {
-                console.error('Background Mail Error:', mailErr);
-            });
+            
+            // Fire and forget emails but log any critical errors
+            Promise.all(emailPromises)
+                .then(() => {
+                    console.log(`All registration emails queued for ${newTeam.members.length} members of team ${uniqueId}`);
+                })
+                .catch(mailErr => {
+                    console.error('Background Mail Error for team', uniqueId, ':', mailErr.message || mailErr);
+                    // Still allow registration to succeed even if emails fail
+                });
         } catch (mailErr) {
-            console.error('Mail Setup Error:', mailErr);
+            console.error('Mail Setup Error:', mailErr.message || mailErr);
+            // Still allow registration to succeed even if email setup fails
         }
 
         res.status(201).json({
@@ -488,6 +496,42 @@ router.post('/reset-password/:token', async (req, res) => {
         res.json({ message: 'Password reset successful' });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+});
+
+// --- TEST EMAIL (Debug endpoint) ---
+router.post('/test-email', async (req, res) => {
+    const { email } = req.body;
+    
+    if (!email) {
+        return res.status(400).json({ message: 'Email address required' });
+    }
+
+    try {
+        console.log('🧪 Testing email service with:', email);
+        
+        await sendEmail(
+            email,
+            'Test Email - Registration System',
+            `<h1>Test Email</h1>
+            <p>If you received this email, the email service is working correctly!</p>
+            <p>Timestamp: ${new Date().toISOString()}</p>
+            <br/>
+            <p style="color: green; font-weight: bold;">✅ Email service is operational</p>`
+        );
+        
+        res.json({ 
+            message: 'Test email sent successfully',
+            email,
+            timestamp: new Date().toISOString()
+        });
+    } catch (err) {
+        console.error('🧪 Email test failed:', err.message);
+        res.status(500).json({ 
+            message: 'Failed to send test email',
+            error: err.message,
+            hint: 'Check that EMAIL_USER and EMAIL_PASS are correctly set in .env file'
+        });
     }
 });
 

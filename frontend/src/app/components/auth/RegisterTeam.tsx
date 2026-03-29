@@ -140,7 +140,26 @@ const RegisterTeam: React.FC = () => {
             });
 
             if (response) {
-                setStep(4); // Success step
+                // Auto-login after successful registration
+                try {
+                    const loginResponse = await fetchApi('/auth/login', {
+                        method: 'POST',
+                        body: JSON.stringify({ email: formData.email.trim(), password: formData.password }),
+                    });
+                    
+                    if (loginResponse && loginResponse.token) {
+                        localStorage.setItem("token", loginResponse.token);
+                        localStorage.setItem("user", JSON.stringify(loginResponse.user));
+                        setStep(4); // Success step - will redirect immediately
+                        // Auto-redirect to dashboard after 1 second
+                        setTimeout(() => {
+                            navigate("/team-leader/dashboard");
+                        }, 1000);
+                    }
+                } catch (loginErr) {
+                    console.error("Auto-login failed:", loginErr);
+                    setStep(4); // Still show success, user can login manually
+                }
             }
         } catch (err: any) {
             alert(err.message || "Registration failed. Please try again.");
@@ -746,10 +765,10 @@ const RegisterTeam: React.FC = () => {
                                         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                                             <button
                                                 type="button"
-                                                onClick={() => navigate('/login/team-leader')}
+                                                onClick={() => navigate('/team-leader/dashboard')}
                                                 className="px-12 py-5 bg-primary hover:bg-primary/90 text-white font-black text-xl rounded-2xl transition-all shadow-xl"
                                             >
-                                                Access Dashboard
+                                                Go to Dashboard
                                             </button>
                                             {settings?.whatsappLink && (
                                                 <a
