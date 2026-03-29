@@ -21,10 +21,6 @@ const ProblemStatement = require('./models/ProblemStatement');
 
 const app = express();
 
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const authMiddleware = require('./middleware/authMiddleware');
-
 // Security Middleware
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors({
@@ -35,8 +31,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-const Event = require('./models/Event');
 
 // Event Scoping Middleware
 app.use(async (req, res, next) => {
