@@ -463,11 +463,32 @@ router.post('/forgot-password', async (req, res) => {
         await user.save();
 
         // Send Email (Fire and forget to speed up response)
-        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL || 'https://neos-chi.vercel.app'}/reset-password/${resetToken}`;
+        const emailHtml = `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <div style="background-color: #6366f1; padding: 32px 20px; text-align: center;">
+                    <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; text-transform: uppercase;">Password Reset</h1>
+                </div>
+                <div style="padding: 40px 32px; background-color: white;">
+                    <p style="color: #374151; font-size: 16px; line-height: 1.5; margin: 0 0 24px 0;">Hello,</p>
+                    <p style="color: #374151; font-size: 16px; line-height: 1.5; margin: 0 0 24px 0;">You requested a password reset for your NEXOSS account. Click the button below to choose a new password. This link is only valid for <strong>15 minutes</strong>.</p>
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="${resetUrl}" style="background-color: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; transition: background-color 0.2s;">Reset Password</a>
+                    </div>
+                    <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 24px 0 0 0;">If you didn't request this, you can safely ignore this email.</p>
+                    <div style="margin-top: 32px; padding-top: 24px; border-t: 1px solid #e5e7eb;">
+                        <p style="color: #9ca3af; font-size: 12px; margin: 0;">If the button above doesn't work, copy and paste this link into your browser:</p>
+                        <p style="color: #6366f1; font-size: 12px; margin: 8px 0 0 0; word-break: break-all;">${resetUrl}</p>
+                    </div>
+                </div>
+                <div style="padding: 24px; background-color: #f3f4f6; text-align: center;">
+                    <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; 2026 NEXOSS Event Review Management System</p>
+                </div>
+            </div>`;
         sendEmail(
             email,
-            'Password Reset Request',
-            `<p>You requested a password reset. Please click the link below to reset your password. This link expires in 15 minutes.</p><a href="${resetUrl}">${resetUrl}</a>`,
+            'NEXOSS - Password Reset',
+            emailHtml,
             user.eventId?.settings?.emailSettings
         ).catch(err => console.error('Background Password Reset Mail Error:', err.message));
 

@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { Root } from "./components/Root";
 import { TeamLeaderLogin } from "./components/auth/TeamLeaderLogin";
 import { ReviewerLogin } from "./components/auth/ReviewerLogin";
@@ -47,8 +47,12 @@ export const router = createBrowserRouter([
         Component: Root,
       },
       {
-        path: "login/team-leader",
+        path: "login/teamleader",
         Component: TeamLeaderLogin,
+      },
+      {
+        path: "login/team-leader",
+        element: <Navigate to="/login/teamleader" replace />,
       },
       {
         path: "login/reviewer",
