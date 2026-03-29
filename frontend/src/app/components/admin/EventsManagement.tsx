@@ -527,20 +527,22 @@ export function EventsManagement() {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
-                                        <div className="space-y-2">
+                                        <div className={`space-y-2 ${formData.settings.registrationType === 'Single' ? 'opacity-50' : ''}`}>
                                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Member Limits</label>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <input
                                                     type="number" placeholder="Min"
-                                                    value={formData.settings.minMembers}
+                                                    value={formData.settings.registrationType === 'Single' ? 1 : formData.settings.minMembers}
+                                                    disabled={formData.settings.registrationType === 'Single'}
                                                     onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, minMembers: parseInt(e.target.value) } })}
-                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-primary/50"
+                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-primary/50 disabled:cursor-not-allowed"
                                                 />
                                                 <input
                                                     type="number" placeholder="Max"
-                                                    value={formData.settings.maxMembers}
+                                                    value={formData.settings.registrationType === 'Single' ? 1 : formData.settings.maxMembers}
+                                                    disabled={formData.settings.registrationType === 'Single'}
                                                     onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, maxMembers: parseInt(e.target.value) } })}
-                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-primary/50"
+                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-primary/50 disabled:cursor-not-allowed"
                                                 />
                                             </div>
                                         </div>
@@ -549,10 +551,11 @@ export function EventsManagement() {
                                             <div className="grid grid-cols-2 gap-2">
                                                 <input
                                                     type="number" placeholder="Max Teams"
-                                                    value={formData.settings.maxTeams}
+                                                    value={formData.settings.registrationType === 'Single' ? '' : formData.settings.maxTeams}
+                                                    disabled={formData.settings.registrationType === 'Single'}
                                                     onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, maxTeams: parseInt(e.target.value) } })}
-                                                    title="Max Teams"
-                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-primary/50"
+                                                    title={formData.settings.registrationType === 'Single' ? "Not applicable for Single Registration" : "Max Teams"}
+                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold focus:border-primary/50 disabled:opacity-20 disabled:cursor-not-allowed"
                                                 />
                                                 <input
                                                     type="number" placeholder="Max Participants"
