@@ -153,7 +153,7 @@ const RegisterTeam: React.FC = () => {
                         setStep(4); // Success step - will redirect immediately
                         // Auto-redirect to dashboard after 1 second
                         setTimeout(() => {
-                            navigate("/team-leader/dashboard");
+                            navigate("/teamleader/dashboard");
                         }, 1000);
                     }
                 } catch (loginErr) {
@@ -765,7 +765,7 @@ const RegisterTeam: React.FC = () => {
                                         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
                                             <button
                                                 type="button"
-                                                onClick={() => navigate('/team-leader/dashboard')}
+                                                onClick={() => navigate('/teamleader/dashboard')}
                                                 className="px-12 py-5 bg-primary hover:bg-primary/90 text-white font-black text-xl rounded-2xl transition-all shadow-xl"
                                             >
                                                 Go to Dashboard

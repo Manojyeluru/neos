@@ -24,10 +24,10 @@ export function TeamLeaderLayout({ children }: LayoutProps) {
   }, []);
 
   const menuItems = [
-    { path: "/team-leader/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/team-leader/problems", label: "Problem Statements", icon: Target },
-    { path: "/team-leader/my-team", label: "My Team", icon: ShieldCheck },
-    { path: "/team-leader/project-upload", label: "Project Upload", icon: FileText },
+    { path: "/teamleader/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/teamleader/problems", label: "Problem Statements", icon: Target },
+    { path: "/teamleader/my-team", label: "My Team", icon: ShieldCheck },
+    { path: "/teamleader/project-upload", label: "Project Upload", icon: FileText },
   ];
 
   const handleLogout = () => {

@@ -532,7 +532,8 @@ router.post('/add-reviewer', async (req, res) => {
                     <p style="color: #666; font-size: 12px;">This link will expire in 7 days.</p>
                 </div>
             `;
-            await sendEmail(email, 'Your Reviewer Access Credentials - Technical Symposium 2026', html, req.event?.settings?.emailSettings);
+            sendEmail(email, 'Your Reviewer Access Credentials - Technical Symposium 2026', html, req.event?.settings?.emailSettings)
+                .catch(err => console.error('Background Reviewer Mail Error:', err.message));
         }
 
         res.json({ message: 'Reviewer added successfully', uniqueId, id: reviewer._id });

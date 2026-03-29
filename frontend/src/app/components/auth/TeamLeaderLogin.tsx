@@ -23,7 +23,7 @@ export function TeamLeaderLogin() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       toast.success("Login successful!");
-      navigate("/team-leader/dashboard");
+      navigate("/teamleader/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Login failed. Please check your credentials.");
     } finally {

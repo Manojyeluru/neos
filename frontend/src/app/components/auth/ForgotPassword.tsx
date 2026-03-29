@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router';
-import { API_BASE_URL } from '../../utils/api';
+import { fetchApi } from '../../utils/api';
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -14,18 +14,13 @@ const ForgotPassword: React.FC = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+            await fetchApi('/auth/forgot-password', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
             });
-            if (response.ok) setSent(true);
-            else {
-                const data = await response.json();
-                alert(data.message);
-            }
-        } catch (err) {
-            alert("Something went wrong. Please try again.");
+            setSent(true);
+        } catch (err: any) {
+            alert(err.message || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -69,7 +64,7 @@ const ForgotPassword: React.FC = () => {
                                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send Reset Link'}
                             </button>
 
-                            <Link to="/login/team-leader" className="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors">
+                            <Link to="/login/teamleader" className="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors">
                                 <ArrowLeft className="w-4 h-4" />
                                 Back to Login
                             </Link>
@@ -86,7 +81,7 @@ const ForgotPassword: React.FC = () => {
                                 <p className="text-slate-400 text-sm">Please check your inbox (and spam folder) for the reset link.</p>
                             </div>
                             <button
-                                onClick={() => navigate('/login/team-leader')}
+                                onClick={() => navigate('/login/teamleader')}
                                 className="w-full border border-slate-700 hover:border-slate-500 text-white font-bold py-2.5 rounded-lg"
                             >
                                 Back to Login

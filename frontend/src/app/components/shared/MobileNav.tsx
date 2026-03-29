@@ -21,9 +21,9 @@ export function MobileNav() {
                 ];
             case 'teamleader':
                 return [
-                    { icon: LayoutDashboard, label: 'Dash', path: '/team-leader/dashboard' },
-                    { icon: FolderKanban, label: 'Problems', path: '/team-leader/problems' },
-                    { icon: User, label: 'My Team', path: '/team-leader/my-team' },
+                    { icon: LayoutDashboard, label: 'Dash', path: '/teamleader/dashboard' },
+                    { icon: FolderKanban, label: 'Problems', path: '/teamleader/problems' },
+                    { icon: User, label: 'My Team', path: '/teamleader/my-team' },
                 ];
             case 'reviewer':
                 return [

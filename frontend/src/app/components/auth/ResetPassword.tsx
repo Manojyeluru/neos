@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Loader2, CheckCircle2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router';
-import { API_BASE_URL } from '../../utils/api';
+import { fetchApi } from '../../utils/api';
 
 const ResetPassword: React.FC = () => {
     const { token } = useParams();
@@ -21,18 +21,13 @@ const ResetPassword: React.FC = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/reset-password/${token}`, {
+            await fetchApi(`/auth/reset-password/${token}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password }),
             });
-            if (response.ok) setSuccess(true);
-            else {
-                const data = await response.json();
-                alert(data.message);
-            }
-        } catch (err) {
-            alert("Something went wrong. Please try again.");
+            setSuccess(true);
+        } catch (err: any) {
+            alert(err.message || "Something went wrong. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -104,7 +99,7 @@ const ResetPassword: React.FC = () => {
                                 <p className="text-slate-400 text-sm">Your password has been successfully reset. You can now login with your new password.</p>
                             </div>
                             <button
-                                onClick={() => navigate('/login/team-leader')}
+                                onClick={() => navigate('/login/teamleader')}
                                 className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg transition-all"
                             >
                                 Go to Login

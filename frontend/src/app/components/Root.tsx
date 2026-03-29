@@ -316,6 +316,7 @@ export function Root() {
     }
   };
 
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -323,7 +324,15 @@ export function Root() {
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-    if (userData) setUser(JSON.parse(userData));
+    if (userData) {
+      const u = JSON.parse(userData);
+      setUser(u);
+      
+      // Auto-redirect to their respective dashboard if they land here while logged in
+      if (u.role === 'admin' || u.role === 'coordinator') navigate("/admin/dashboard");
+      else if (u.role === 'reviewer') navigate("/reviewer/dashboard");
+      else if (u.role === 'teamleader') navigate("/teamleader/dashboard");
+    }
   }, []);
 
   return (
@@ -462,7 +471,7 @@ export function Root() {
             >
               <ShieldCheck className="w-5 h-5" /> CHECK STATUS
             </button>
-            <Link to="/login/team-leader" className="px-8 py-4 bg-slate-900 border border-white/10 text-white rounded-xl font-black text-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+            <Link to="/login/teamleader" className="px-8 py-4 bg-slate-900 border border-white/10 text-white rounded-xl font-black text-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
               <Lock className="w-4 h-4 text-slate-500" /> TEAM LOGIN
             </Link>
           </div>
@@ -489,7 +498,7 @@ export function Root() {
           </motion.div>
 
           <motion.div variants={item}>
-            <Link to="/login/team-leader" className="glass-card p-6 rounded-[2rem] block text-left group hover:border-primary/40 transition-all hover:bg-primary/5">
+            <Link to="/login/teamleader" className="glass-card p-6 rounded-[2rem] block text-left group hover:border-primary/40 transition-all hover:bg-primary/5">
               <div className="w-12 h-12 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-inner transition-transform group-hover:scale-110">
                 <Users className="text-primary w-6 h-6" />
               </div>

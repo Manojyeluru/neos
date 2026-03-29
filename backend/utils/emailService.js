@@ -16,6 +16,7 @@ if (!emailUser || !emailPass) {
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
+    pool: true,
     auth: {
         user: emailUser,
         pass: emailPass
@@ -44,6 +45,7 @@ const sendEmail = async (to, subject, html, eventEmailSettings = null) => {
         try {
             currentTransporter = nodemailer.createTransport({
                 service: 'gmail',
+                pool: true,
                 auth: {
                     user: eventEmailSettings.user,
                     pass: eventEmailSettings.pass

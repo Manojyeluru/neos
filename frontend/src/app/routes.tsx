@@ -80,16 +80,16 @@ export const router = createBrowserRouter([
       },
       // Team Leader Portal
       {
-        path: "team-leader/dashboard",
-        element: <ProtectedRoute allowedRoles={["team-leader"]}><TeamLeaderDashboard /></ProtectedRoute>,
+        path: "teamleader/dashboard",
+        element: <ProtectedRoute allowedRoles={["teamleader"]}><TeamLeaderDashboard /></ProtectedRoute>,
       },
       {
-        path: "team-leader/problems",
-        element: <ProtectedRoute allowedRoles={["team-leader"]}><ProblemSelection /></ProtectedRoute>,
+        path: "teamleader/problems",
+        element: <ProtectedRoute allowedRoles={["teamleader"]}><ProblemSelection /></ProtectedRoute>,
       },
       {
-        path: "team-leader/my-team",
-        element: <ProtectedRoute allowedRoles={["team-leader"]}><MyTeam /></ProtectedRoute>,
+        path: "teamleader/my-team",
+        element: <ProtectedRoute allowedRoles={["teamleader"]}><MyTeam /></ProtectedRoute>,
       },
       // Reviewer Portal
       {
@@ -142,8 +142,8 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute allowedRoles={["admin", "coordinator"]}><AdminVoting /></ProtectedRoute>,
       },
       {
-        path: "team-leader/project-upload",
-        element: <ProtectedRoute allowedRoles={["team-leader"]}><ProjectUpload /></ProtectedRoute>,
+        path: "teamleader/project-upload",
+        element: <ProtectedRoute allowedRoles={["teamleader"]}><ProjectUpload /></ProtectedRoute>,
       },
       {
         path: "voting",
