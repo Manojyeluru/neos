@@ -129,8 +129,9 @@ const RegisterTeam: React.FC = () => {
         try {
             const payload = {
                 ...formData,
+                teamName: participationMode === 'solo' ? `${formData.name}'s Registration` : formData.teamName,
                 eventId: settings?.eventId,
-                members: members // Only other members
+                members: participationMode === 'solo' ? [] : members // Ensure no members for solo
             };
 
             const response = await fetchApi('/auth/register/team-leader', {
@@ -239,7 +240,7 @@ const RegisterTeam: React.FC = () => {
                         </div>
 
                         <div className="space-y-6 relative z-10">
-                            {[1, 2, 3].map((s) => (
+                            {(participationMode === 'solo' ? [1, 2] : [1, 2, 3]).map((s) => (
                                 <div key={s} className="flex items-center gap-4">
                                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black transition-all ${step === s ? "bg-primary text-white scale-110 shadow-[0_0_20px_rgba(99,102,241,0.5)]" :
                                         step > s ? "bg-emerald-500 text-white" : "bg-slate-800 text-slate-500"
@@ -247,7 +248,7 @@ const RegisterTeam: React.FC = () => {
                                         {step > s ? <CheckCircle2 className="w-5 h-5" /> : s}
                                     </div>
                                     <div className={`text-sm font-bold uppercase tracking-widest ${step === s ? "text-white" : "text-slate-600"}`}>
-                                        {s === 1 ? "Leader Info" : s === 2 ? "College Details" : "Team Members"}
+                                        {s === 1 ? "Participant Info" : s === 2 ? "College Details" : "Team Members"}
                                     </div>
                                 </div>
                             ))}
@@ -470,10 +471,16 @@ const RegisterTeam: React.FC = () => {
                                         <div className="flex gap-4 pt-12">
                                             <button type="button" onClick={() => setStep(1)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all">BACK</button>
                                             <button
-                                                type="button" onClick={() => setStep(3)}
-                                                className="flex-1 bg-primary text-white font-black text-lg rounded-2xl transform hover:-translate-y-1 transition-all"
+                                                type="button" onClick={() => {
+                                                    if (participationMode === 'solo') {
+                                                        settings.isPaidEvent ? setStep(3.5) : handleRegister({ preventDefault: () => {} } as any);
+                                                    } else {
+                                                        setStep(3);
+                                                    }
+                                                }}
+                                                className="flex-1 bg-primary text-white font-black text-lg rounded-2xl transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
                                             >
-                                                CONTINUE
+                                                {participationMode === 'solo' ? (settings.isPaidEvent ? 'PROCEED TO PAYMENT' : 'REGISTER NOW') : 'CONTINUE'}
                                             </button>
                                         </div>
                                     </motion.div>

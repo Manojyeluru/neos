@@ -157,16 +157,23 @@ router.post('/register/team-leader', async (req, res) => {
 
         // Validate member count
         const totalMembers = (members?.length || 0) + 1; // +1 for the leader
-        if (totalMembers < settings.minMembers || totalMembers > settings.maxMembers) {
-            return res.status(400).json({
-                message: `Team size must be between ${settings.minMembers} and ${settings.maxMembers}`
-            });
-        }
 
-        // Validate max limit
-        const currentTeamsCount = await Team.countDocuments({ eventId: event._id });
-        if (settings.maxTeams && currentTeamsCount >= settings.maxTeams) {
-            return res.status(400).json({ message: 'Event has reached the maximum number of teams allowed.' });
+        if (settings.registrationType === 'Single') {
+            if (totalMembers > 1) {
+                return res.status(400).json({ message: 'Single registration allows only 1 participant.' });
+            }
+        } else {
+            if (totalMembers < settings.minMembers || totalMembers > settings.maxMembers) {
+                return res.status(400).json({
+                    message: `Team size must be between ${settings.minMembers} and ${settings.maxMembers}`
+                });
+            }
+
+            // Validate max limit for teams
+            const currentTeamsCount = await Team.countDocuments({ eventId: event._id });
+            if (settings.maxTeams && currentTeamsCount >= settings.maxTeams) {
+                return res.status(400).json({ message: 'Event has reached the maximum number of teams allowed.' });
+            }
         }
 
         const allCurrentTeams = await Team.find({ eventId: event._id }, 'members');
