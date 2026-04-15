@@ -20,7 +20,13 @@ export function AdminLogin() {
       });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/admin/dashboard");
+      if (data.user.role === 'admin' || data.user.role === 'coordinator') {
+        navigate("/admin/dashboard");
+      } else if (data.user.role === 'reviewer') {
+        navigate("/reviewer/dashboard");
+      } else {
+        navigate("/teamleader/dashboard");
+      }
     } catch (err: any) {
       alert(err.message);
     } finally {

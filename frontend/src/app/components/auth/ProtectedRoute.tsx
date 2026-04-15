@@ -29,8 +29,6 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
         return <Navigate to="/" replace />;
     }
 
-    // Admin can access everything
-    if (user.role === "admin") return <>{children}</>;
 
     if (!allowedRoles.includes(user.role)) {
         // Redirect to their own dashboard if they are lost
