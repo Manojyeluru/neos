@@ -10,6 +10,14 @@ router.get('/settings', async (req, res) => {
         if (req.event) {
             return res.json(req.event.settings);
         }
+        
+        if (req.user && req.user.uniqueId) {
+            const team = await Team.findOne({ teamId: req.user.uniqueId }).populate('eventId');
+            if (team && team.eventId) {
+                return res.json(team.eventId.settings);
+            }
+        }
+        
         const settings = await EventSettings.findOne();
         res.json(settings);
     } catch (err) {
@@ -20,8 +28,7 @@ router.get('/settings', async (req, res) => {
 // Get team info by Team ID
 router.get('/info/:teamId', async (req, res) => {
     try {
-        const query = req.event ? { teamId: req.params.teamId, eventId: req.event._id } : { teamId: req.params.teamId };
-        const team = await Team.findOne(query)
+        const team = await Team.findOne({ teamId: req.params.teamId })
             .populate('leaderId', 'name email phone institutionName year department')
             .populate('problemStatementId', 'title description');
         if (!team) return res.status(404).json({ message: 'Team not found' });
