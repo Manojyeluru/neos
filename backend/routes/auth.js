@@ -278,11 +278,15 @@ router.post('/register/team-leader', async (req, res) => {
                         <a href="${settings.whatsappLink}" style="padding: 10px 20px; background-color: #25D366; color: white; border-radius: 5px; text-decoration: none; display: inline-block;">Join WhatsApp Group</a>`;
                     }
 
+                    const messageContent = settings.registrationType === 'Single'
+                        ? `<p>You have successfully registered for <b>${event.name}</b>. Your unique Participant ID is <b>${uniqueId}</b>.</p>`
+                        : `<p>You have successfully registered for <b>${event.name}</b>. Your unique Team ID is <b>${uniqueId}</b>, and your team name is <b>${newTeam.teamName}</b>.</p>`;
+
                     return sendEmail(
                         member.email,
                         `Registration Successful - ${event.name}`,
                         `<h1>Welcome, ${member.name}!</h1>
-                        <p>You have successfully registered for <b>${event.name}</b>. Your unique Team ID is <b>${uniqueId}</b>, and your team name is <b>${newTeam.teamName}</b>.</p>
+                        ${messageContent}
                         <br/>
                         <p><b>MANDATORY:</b> Please register your Face ID to ensure your attendance is detected successfully during the event phase.</p>
                         <a href="${faceScanLink}" style="padding: 10px 20px; background-color: #3b82f6; color: white; border-radius: 5px; text-decoration: none; display: inline-block;">Complete Face ID Scan</a>

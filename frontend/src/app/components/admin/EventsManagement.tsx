@@ -180,7 +180,7 @@ export function EventsManagement() {
     const openCreateModal = () => {
         setEditingEvent(null);
         setFormData({
-            eventId: '',
+            eventId: `evt-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
             name: '',
             description: '',
             startDate: '',
@@ -457,28 +457,15 @@ export function EventsManagement() {
                                 </div>
 
                                 <form onSubmit={handleSave} className="space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Event ID (Unique)</label>
-                                            <input
-                                                type="text" required
-                                                value={formData.eventId}
-                                                onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
-                                                disabled={!!editingEvent}
-                                                className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white font-bold focus:border-primary/50 outline-none disabled:opacity-50"
-                                                placeholder="e.g. hackathon-2026"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Event Name</label>
-                                            <input
-                                                type="text" required
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white font-bold focus:border-primary/50 outline-none"
-                                                placeholder="e.g. Global Tech Symposium"
-                                            />
-                                        </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Event Name</label>
+                                        <input
+                                            type="text" required
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white font-bold focus:border-primary/50 outline-none"
+                                            placeholder="e.g. Global Tech Symposium"
+                                        />
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -585,7 +572,20 @@ export function EventsManagement() {
                                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Registration Type</label>
                                             <select
                                                 value={formData.settings.registrationType}
-                                                onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, registrationType: e.target.value } })}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setFormData({ 
+                                                        ...formData, 
+                                                        settings: { 
+                                                            ...formData.settings, 
+                                                            registrationType: val,
+                                                            ...(val === 'Single' ? {
+                                                                reviewersRequired: false,
+                                                                problemStatementsRequired: false
+                                                            } : {})
+                                                        } 
+                                                    });
+                                                }}
                                                 className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-xs font-bold"
                                             >
                                                 <option value="Team">TEAM REGISTRATION</option>
@@ -619,8 +619,12 @@ export function EventsManagement() {
                                                     <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">Status: {formData.settings.reviewersRequired ? 'ENABLED' : 'DISABLED'}</p>
                                                 </div>
                                                 <div
-                                                    onClick={() => setFormData({ ...formData, settings: { ...formData.settings, reviewersRequired: !formData.settings.reviewersRequired } })}
-                                                    className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-300 flex items-center ${formData.settings.reviewersRequired ? 'bg-primary' : 'bg-slate-800'}`}
+                                                    onClick={() => {
+                                                        if (formData.settings.registrationType !== 'Single') {
+                                                            setFormData({ ...formData, settings: { ...formData.settings, reviewersRequired: !formData.settings.reviewersRequired } });
+                                                        }
+                                                    }}
+                                                    className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 flex items-center ${formData.settings.registrationType === 'Single' ? 'cursor-not-allowed opacity-50 bg-slate-800' : (formData.settings.reviewersRequired ? 'bg-primary cursor-pointer' : 'bg-slate-800 cursor-pointer')}`}
                                                 >
                                                     <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 ${formData.settings.reviewersRequired ? 'translate-x-6' : 'translate-x-0'}`} />
                                                 </div>
@@ -632,8 +636,12 @@ export function EventsManagement() {
                                                     <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest mt-1">Status: {formData.settings.problemStatementsRequired ? 'ENABLED' : 'DISABLED'}</p>
                                                 </div>
                                                 <div
-                                                    onClick={() => setFormData({ ...formData, settings: { ...formData.settings, problemStatementsRequired: !formData.settings.problemStatementsRequired } })}
-                                                    className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-300 flex items-center ${formData.settings.problemStatementsRequired ? 'bg-accent' : 'bg-slate-800'}`}
+                                                    onClick={() => {
+                                                        if (formData.settings.registrationType !== 'Single') {
+                                                            setFormData({ ...formData, settings: { ...formData.settings, problemStatementsRequired: !formData.settings.problemStatementsRequired } });
+                                                        }
+                                                    }}
+                                                    className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 flex items-center ${formData.settings.registrationType === 'Single' ? 'cursor-not-allowed opacity-50 bg-slate-800' : (formData.settings.problemStatementsRequired ? 'bg-accent cursor-pointer' : 'bg-slate-800 cursor-pointer')}`}
                                                 >
                                                     <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-300 ${formData.settings.problemStatementsRequired ? 'translate-x-6' : 'translate-x-0'}`} />
                                                 </div>
@@ -646,7 +654,7 @@ export function EventsManagement() {
                                             <Target className="w-5 h-5 text-green-400" />
                                             <h3 className="text-sm font-black text-white uppercase tracking-widest">Communication & Email</h3>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 gap-4">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">WhatsApp Group Link</label>
                                                 <input
@@ -657,27 +665,6 @@ export function EventsManagement() {
                                                     className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:border-green-400/50 outline-none"
                                                 />
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">SMTP Sender Email (Gmail)</label>
-                                                <input
-                                                    type="email"
-                                                    placeholder="event@gmail.com"
-                                                    value={formData.settings.emailSettings?.user || ''}
-                                                    onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, emailSettings: { ...formData.settings.emailSettings, user: e.target.value } as any } })}
-                                                    className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-400/50 outline-none"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Gmail App Password</label>
-                                            <input
-                                                type="password"
-                                                placeholder="Enter 16-character app password"
-                                                value={formData.settings.emailSettings?.pass || ''}
-                                                onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, emailSettings: { ...formData.settings.emailSettings, pass: e.target.value } as any } })}
-                                                className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white text-sm focus:border-blue-400/50 outline-none"
-                                            />
-                                            <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1 italic">Note: Use a Gmail App Password, not your regular password.</p>
                                         </div>
                                     </div>
 

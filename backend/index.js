@@ -94,9 +94,7 @@ app.listen(PORT, '0.0.0.0', () => {
 });
 
 // Models
-const User = require('./models/User');
-const Team = require('./models/Team');
-const ProblemStatement = require('./models/ProblemStatement');
+// Models already required at the top
 
 // Routes preview (Implementation will follow)
 app.get('/', (req, res) => res.send('API Running'));

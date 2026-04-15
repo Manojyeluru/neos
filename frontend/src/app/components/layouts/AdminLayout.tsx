@@ -90,6 +90,8 @@ export function AdminLayout({ children }: LayoutProps) {
   ].filter(item => item.show !== false);
 
   const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/");
   };
 

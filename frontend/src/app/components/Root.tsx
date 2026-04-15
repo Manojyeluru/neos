@@ -472,7 +472,7 @@ export function Root() {
               <ShieldCheck className="w-5 h-5" /> CHECK STATUS
             </button>
             <Link to="/login/teamleader" className="px-8 py-4 bg-slate-900 border border-white/10 text-white rounded-xl font-black text-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
-              <Lock className="w-4 h-4 text-slate-500" /> TEAM LOGIN
+              <Lock className="w-4 h-4 text-slate-500" /> PARTICIPANT LOGIN
             </Link>
           </div>
         </motion.div>
@@ -502,8 +502,8 @@ export function Root() {
               <div className="w-12 h-12 bg-slate-900 border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-inner transition-transform group-hover:scale-110">
                 <Users className="text-primary w-6 h-6" />
               </div>
-              <h3 className="text-xl font-black text-white mb-2 tracking-tighter uppercase leading-tight">Team Portal</h3>
-              <p className="text-slate-400 font-bold text-xs leading-relaxed">Secure access for Team Leaders to register team members and view info.</p>
+              <h3 className="text-xl font-black text-white mb-2 tracking-tighter uppercase leading-tight">Participant Portal</h3>
+              <p className="text-slate-400 font-bold text-xs leading-relaxed">Secure access for participants and leaders to view event and team info.</p>
               <div className="mt-6 flex items-center gap-2 text-primary font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1">
                 Go to Portal <ArrowRight className="w-3 h-3" />
               </div>

@@ -54,9 +54,9 @@ export function TeamLeaderLogin() {
               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain p-2" />
             </motion.div>
             <h1 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">
-              Team <span className="text-primary italic">Leader</span>
+              Participant <span className="text-primary italic">Portal</span>
             </h1>
-            <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Team Leader Login</p>
+            <p className="text-slate-500 font-bold text-[10px] uppercase tracking-widest">Participant & Leader Login</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

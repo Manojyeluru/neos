@@ -36,30 +36,12 @@ transporter.verify((error, success) => {
     }
 });
 
-const sendEmail = async (to, subject, html, eventEmailSettings = null) => {
-    // If eventEmailSettings are provided (from database/event creation), use them
+const sendEmail = async (to, subject, html) => {
     let currentTransporter = transporter;
     let fromAccount = emailUser;
 
-    if (eventEmailSettings && eventEmailSettings.user && eventEmailSettings.pass) {
-        try {
-            currentTransporter = nodemailer.createTransport({
-                service: 'gmail',
-                pool: true,
-                auth: {
-                    user: eventEmailSettings.user,
-                    pass: eventEmailSettings.pass
-                }
-            });
-            fromAccount = eventEmailSettings.user;
-        } catch (err) {
-            console.error('❌ Failed to use event-specific email settings:', err.message);
-            // Will fallback to default if desired or throw error
-        }
-    }
-
-    if (!fromAccount || (!emailPass && !eventEmailSettings?.pass)) {
-        const error = new Error('Email service not configured. Check EMAIL_USER and EMAIL_PASS in .env OR event settings.');
+    if (!fromAccount || !emailPass) {
+        const error = new Error('Email service not configured. Check EMAIL_USER and EMAIL_PASS in .env.');
         console.error('📧 Email not sent to', to, ':', error.message);
         throw error;
     }

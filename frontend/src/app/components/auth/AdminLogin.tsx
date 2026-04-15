@@ -53,7 +53,7 @@ export function AdminLogin() {
           >
             <h1 className="text-5xl font-black text-white mb-6 uppercase tracking-tighter">
               Event <br />
-              <span className="text-primary text-6xl">Administration</span>
+              <span className="text-primary text-6xl">Coordination</span>
             </h1>
             <p className="text-xl text-slate-400 font-medium max-w-md mx-auto leading-relaxed">
               Official gateway for managing participants and evaluating events.
@@ -94,10 +94,10 @@ export function AdminLogin() {
               <Lock className="w-8 h-8 text-primary" />
             </div>
             <h2 className="text-4xl font-black text-white tracking-tighter uppercase">
-              Admin Login
+              Coordinator Login
             </h2>
             <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-              Administrator Login
+              Event Coordinator Access
             </p>
           </div>
 
@@ -112,7 +112,7 @@ export function AdminLogin() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-6 py-4 rounded-2xl bg-slate-950 border border-white/5 text-white font-bold placeholder:text-slate-700 focus:outline-none focus:border-primary/50 transition-all shadow-inner"
-                placeholder="Admin username"
+                placeholder="Coordinator username"
                 required
               />
             </div>

@@ -13,6 +13,7 @@ export function TeamLeaderDashboard() {
   const navigate = useNavigate();
   const [teamId, setTeamId] = useState("");
   const [teamInfo, setTeamInfo] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
 
@@ -30,11 +31,16 @@ export function TeamLeaderDashboard() {
   const handleFetchTeam = async (id: string) => {
     setChecking(true);
     try {
-      const data = await fetchApi(`/team/info/${id}`);
+      const [data, settingsData] = await Promise.all([
+        fetchApi(`/team/info/${id}`),
+        fetchApi('/team/settings')
+      ]);
       setTeamInfo(data);
+      setSettings(settingsData);
     } catch (err) {
       console.error(err);
       setTeamInfo(null);
+      setSettings(null);
     } finally {
       setChecking(false);
       setLoading(false);
@@ -145,7 +151,7 @@ export function TeamLeaderDashboard() {
                           </div>
 
                           <div className="space-y-4">
-                            <p className="text-xs font-black text-slate-500 uppercase tracking-widest">Team Members ({teamInfo.members.length})</p>
+                            <p className="text-xs font-black text-slate-500 uppercase tracking-widest">{settings?.registrationType === 'Single' ? 'Participant Info' : `Team Members (${teamInfo.members.length})`}</p>
                             <div className="flex flex-wrap gap-2">
                               {teamInfo.members.map((m: any, i: number) => (
                                 <span key={i} className="px-3 py-1.5 bg-slate-900 border border-white/5 rounded-lg text-xs font-bold text-slate-400 group-hover:text-primary transition-colors">
@@ -171,11 +177,12 @@ export function TeamLeaderDashboard() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-5">
-                      <div className="glass-card p-10 rounded-[3.5rem] h-full flex flex-col justify-between border-2 border-primary/20 bg-primary/5 relative overflow-hidden group">
-                        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
+                    <div className="lg:col-span-5 flex flex-col gap-8">
+                      {settings?.registrationType !== 'Single' && (
+                        <div className="glass-card p-10 rounded-[3.5rem] flex-1 flex flex-col justify-between border-2 border-primary/20 bg-primary/5 relative overflow-hidden group">
+                          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
 
-                        <div className="space-y-6 relative z-10">
+                          <div className="space-y-6 relative z-10">
                           <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-500">
                             <Rocket className="w-10 h-10 text-primary" />
                           </div>
@@ -192,15 +199,35 @@ export function TeamLeaderDashboard() {
                           SELECT PROBLEM <ArrowRight className="w-6 h-6" />
                         </button>
                       </div>
+                      )}
+
+                      {/* Optional Reviews Metric Card */}
+                      {(teamInfo.scores?.length > 0 || settings?.registrationType === 'Single') && (
+                        <div className="glass-card p-8 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 relative overflow-hidden group">
+                          <div className="flex items-center justify-between">
+                            <div>
+                               <p className="text-xs font-black text-emerald-500 uppercase tracking-widest">Technical Reviews</p>
+                               <h4 className="text-4xl font-black text-white mt-1">{teamInfo.scores?.length || 0} <span className="text-sm text-slate-400 font-bold">Evaluations</span></h4>
+                            </div>
+                            <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                               <CheckCircle className="w-6 h-6 text-emerald-400" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[
+                    {(settings?.registrationType === 'Single' ? [
+                      { step: "01", label: "Registration", status: "Completed", icon: CheckCircle, color: "emerald-500" },
+                      { step: "02", label: "Verification", status: "Verified", icon: ShieldCheck, color: "primary" },
+                      { step: "03", label: "Review Status", status: (teamInfo.scores?.length > 0) ? "Evaluated" : "Awaiting", icon: Zap, color: (teamInfo.scores?.length > 0) ? "emerald-500" : "accent" },
+                    ] : [
                       { step: "01", label: "Registration", status: "Completed", icon: CheckCircle, color: "emerald-500" },
                       { step: "02", label: "Verification", status: "Verified", icon: ShieldCheck, color: "primary" },
                       { step: "03", label: "Selection", status: teamInfo.problemStatementId ? "Selected" : "Active Now", icon: Zap, color: teamInfo.problemStatementId ? "emerald-500" : "accent" },
-                    ].map((step, i) => (
+                    ]).map((step, i) => (
                       <div key={i} className="glass-card p-6 rounded-3xl flex items-center gap-6 border border-white/5">
                         <div className={`text-4xl font-black text-${step.color} opacity-40 font-mono tracking-tighter`}>{step.step}</div>
                         <div>
