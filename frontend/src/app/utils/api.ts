@@ -2,7 +2,9 @@
 // This avoids CORS issues and works regardless of hostname differences.
 export const API_BASE_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api';
 
-export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const fetchApi = async (endpoint: string, options: RequestInit = {}, retries = 2): Promise<any> => {
     const token = localStorage.getItem('token');
     const eventId = localStorage.getItem('selectedEventId');
     const headers = {
@@ -25,9 +27,22 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
 
         return response.json();
     } catch (err: any) {
-        if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-            throw new Error('Connection refused: The event server is unreachable. Please ensure the backend is running at ' + API_BASE_URL);
+        // Handle Render cold-start: retry with backoff on network failures
+        if ((err.name === 'TypeError' && err.message === 'Failed to fetch') || err.message?.includes('ERR_CONNECTION_REFUSED')) {
+            if (retries > 0) {
+                const delay = (3 - retries) * 2000 + 1000; // 1s, 3s backoff
+                console.warn(`Backend unreachable, retrying in ${delay}ms... (${retries} attempts left)`);
+                await sleep(delay);
+                return fetchApi(endpoint, options, retries - 1);
+            }
+            throw new Error('The server is starting up — this can take ~30 seconds on first load. Please wait and try again.');
         }
         throw err;
     }
 };
+
+// Keep-alive ping: wakes Render from sleep every 14 minutes
+if (import.meta.env.VITE_API_URL) {
+    const ping = () => fetch(`${API_BASE_URL}/auth/public-events`).catch(() => {});
+    setInterval(ping, 14 * 60 * 1000);
+}
