@@ -666,6 +666,8 @@ function TeamDetailsModal({
   onEditOpen: () => void;
 }) {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [updatingPayment, setUpdatingPayment] = useState<string | null>(null);
+  const [localPaymentStatus, setLocalPaymentStatus] = useState(team.paymentStatus || 'Free');
 
   const handleStatus = async (status: string) => {
     if (!team._id) return;
@@ -680,6 +682,22 @@ function TeamDetailsModal({
       console.error(err);
     } finally {
       setUpdatingStatus(null);
+    }
+  };
+
+  const handlePayment = async (paymentStatus: string) => {
+    if (!team._id) return;
+    setUpdatingPayment(paymentStatus);
+    try {
+      await fetchApi(`/admin/teams/${team._id}/payment`, {
+        method: "PATCH",
+        body: JSON.stringify({ paymentStatus }),
+      });
+      setLocalPaymentStatus(paymentStatus);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUpdatingPayment(null);
     }
   };
 
@@ -774,17 +792,37 @@ function TeamDetailsModal({
 
             <div className="bg-slate-950/50 p-6 rounded-[2rem] border border-white/5 shadow-inner group hover:border-emerald-500/30 transition-all">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-4">Payment</span>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
                   <ShieldCheck className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
-                  <div className={`text-xl font-black uppercase ${team.paymentStatus === "Verified" ? "text-emerald-500" : "text-amber-500"}`}>
-                    {team.paymentStatus || "Free"}
+                  <div className={`text-xl font-black uppercase ${localPaymentStatus === "Verified" ? "text-emerald-500" : localPaymentStatus === "Rejected" ? "text-red-500" : localPaymentStatus === "Free" ? "text-slate-400" : "text-amber-500"}`}>
+                    {localPaymentStatus}
                   </div>
                   <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Status</div>
                 </div>
               </div>
+              {localPaymentStatus !== 'Free' && (
+                <div className="flex gap-2 mt-2">
+                  <button
+                    onClick={() => handlePayment('Verified')}
+                    disabled={updatingPayment !== null || localPaymentStatus === 'Verified'}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {updatingPayment === 'Verified' ? <Loader2 className="w-3 h-3 animate-spin" /> : <ThumbsUp className="w-3 h-3" />}
+                    Verify
+                  </button>
+                  <button
+                    onClick={() => handlePayment('Rejected')}
+                    disabled={updatingPayment !== null || localPaymentStatus === 'Rejected'}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    {updatingPayment === 'Rejected' ? <Loader2 className="w-3 h-3 animate-spin" /> : <ThumbsDown className="w-3 h-3" />}
+                    Reject
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

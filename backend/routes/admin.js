@@ -209,19 +209,23 @@ router.post('/criteria/initialize-defaults', async (req, res) => {
 // --- STATS ---
 router.get('/stats', async (req, res) => {
     try {
-        const query = { eventId: req.event?._id };
-        const [teamsCount, reviewersCount, roundsCount, problemsCount] = await Promise.all([
-            Team.countDocuments(query),
-            User.countDocuments({ role: 'reviewer', eventId: query.eventId }), // Fixed?? Or global?
-            Round.countDocuments(query),
-            ProblemStatement.countDocuments(query)
+        const eventFilter = req.event?._id ? { eventId: req.event._id } : {};
+        const [teamsCount, reviewersCount, roundsCount, problemsCount, allTeams] = await Promise.all([
+            Team.countDocuments(eventFilter),
+            User.countDocuments({ role: 'reviewer' }),
+            Round.countDocuments(eventFilter),
+            ProblemStatement.countDocuments(eventFilter),
+            Team.find(eventFilter, 'members')
         ]);
+
+        const totalMembers = allTeams.reduce((sum, t) => sum + (t.members?.length || 0), 0);
 
         res.json({
             teams: teamsCount,
             reviewers: reviewersCount,
             rounds: roundsCount,
-            problems: problemsCount
+            problems: problemsCount,
+            members: totalMembers
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -255,7 +259,23 @@ router.patch('/teams/:id/status', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// --- DELETE ALL TEAMS ---
+// --- UPDATE PAYMENT STATUS ---
+router.patch('/teams/:id/payment', async (req, res) => {
+    try {
+        const { paymentStatus } = req.body;
+        if (!['Free', 'Pending', 'Verified', 'Rejected'].includes(paymentStatus)) {
+            return res.status(400).json({ message: 'Invalid payment status' });
+        }
+        const team = await Team.findByIdAndUpdate(
+            req.params.id,
+            { paymentStatus },
+            { new: true }
+        );
+        if (!team) return res.status(404).json({ message: 'Team not found' });
+        res.json({ message: `Payment status updated to ${paymentStatus}`, team });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 router.delete('/teams/all', async (req, res) => {
     try {
         const eventId = req.event?._id;

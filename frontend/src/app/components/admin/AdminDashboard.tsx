@@ -88,6 +88,19 @@ export function AdminDashboard() {
       trend: statsData?.problems > 0 ? "LIVE" : "NONE",
       trendColor: statsData?.problems > 0 ? "text-cyan-400" : "text-slate-600",
     },
+    {
+      label: "Total Members",
+      value: statsData?.members ?? "—",
+      icon: UserCheck,
+      color: "text-amber-400",
+      borderColor: "border-amber-400/20",
+      bgColor: "bg-amber-400/10",
+      glowColor: "bg-amber-500/5",
+      href: "/admin/teams",
+      description: "Registered participants",
+      trend: statsData?.members > 0 ? "ENROLLED" : "NONE",
+      trendColor: statsData?.members > 0 ? "text-amber-400" : "text-slate-600",
+    },
   ];
 
   if (loading) {
@@ -134,7 +147,7 @@ export function AdminDashboard() {
         </motion.div>
 
         {/* Stat Cards — Clickable */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
