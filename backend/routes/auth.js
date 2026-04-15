@@ -298,18 +298,12 @@ router.post('/register/team-leader', async (req, res) => {
                 return Promise.resolve();
             });
             
-            // Fire and forget emails but log any critical errors
-            Promise.all(emailPromises)
-                .then(() => {
-                    console.log(`All registration emails queued for ${newTeam.members.length} members of team ${uniqueId}`);
-                })
-                .catch(mailErr => {
-                    console.error('Background Mail Error for team', uniqueId, ':', mailErr.message || mailErr);
-                    // Still allow registration to succeed even if emails fail
-                });
+            // AWAIT the emails because on Vercel Serverless, background promises are killed the moment res.json is called
+            await Promise.all(emailPromises);
+            console.log(`All registration emails successfully sent for ${newTeam.members.length} members of team ${uniqueId}`);
         } catch (mailErr) {
-            console.error('Mail Setup Error:', mailErr.message || mailErr);
-            // Still allow registration to succeed even if email setup fails
+            console.error('Mail Error during registration for team', uniqueId, ':', mailErr.message || mailErr);
+            // Still allow registration to succeed even if emails fail, but they should be logged
         }
 
         res.status(201).json({
@@ -489,12 +483,11 @@ router.post('/forgot-password', async (req, res) => {
                     <p style="color: #9ca3af; font-size: 12px; margin: 0;">&copy; 2026 NEXOSS Event Review Management System</p>
                 </div>
             </div>`;
-        sendEmail(
+        await sendEmail(
             email,
             'NEXOSS - Password Reset',
-            emailHtml,
-            user.eventId?.settings?.emailSettings
-        ).catch(err => console.error('Background Password Reset Mail Error:', err.message));
+            emailHtml
+        );
 
         res.json({ message: 'Reset email sent' });
     } catch (err) {
