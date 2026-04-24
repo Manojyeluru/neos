@@ -320,6 +320,14 @@ export function EventsManagement() {
                         <option value="Completed" className="bg-slate-900 text-blue-500">COMPLETED</option>
                     </select>
                 </div>
+                <div className="p-3 bg-slate-900/50 rounded-xl border border-white/5 text-center flex flex-col justify-between group/amount overflow-hidden relative">
+                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Total Revenue</p>
+                    <div className="flex flex-col items-center justify-center">
+                        <span className="text-sm font-black text-white">₹{event.totalGeneratedAmount?.toLocaleString() || 0}</span>
+                        <span className="text-[7px] text-slate-500 font-bold uppercase tracking-tighter mt-0.5">ESTIMATED</span>
+                    </div>
+                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/amount:opacity-100 transition-opacity pointer-events-none" />
+                </div>
                 <div className="p-3 bg-slate-900/50 rounded-xl border border-white/5 text-center flex flex-col justify-between">
                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Teams Limits</p>
                     <div className="flex items-center justify-center gap-1">
@@ -693,8 +701,17 @@ export function EventsManagement() {
                                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Registration Fee (INR)</label>
                                                     <input
                                                         type="number"
-                                                        value={formData.settings.registrationFee}
-                                                        onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, registrationFee: parseInt(e.target.value) } })}
+                                                        value={formData.settings.registrationFee || ''}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            setFormData({ 
+                                                                ...formData, 
+                                                                settings: { 
+                                                                    ...formData.settings, 
+                                                                    registrationFee: val === '' ? 0 : parseInt(val) 
+                                                                } 
+                                                            });
+                                                        }}
                                                         className="w-full bg-slate-900 border border-white/5 rounded-xl px-4 py-3 text-white font-black focus:border-cyan-500/50 outline-none"
                                                         placeholder="500"
                                                     />

@@ -5,13 +5,17 @@ import {
   Users, User, Mail, Phone, Hash,
   FileText, Award, Calendar, Shield,
   ChevronRight, Sparkles, Zap, CreditCard,
-  CheckCircle2, XCircle, AlertCircle, Loader2
+  CheckCircle2, XCircle, AlertCircle, Loader2, Key, ShieldAlert, Save, X
 } from "lucide-react";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 export function MyTeam() {
   const [teamData, setTeamData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showPassModal, setShowPassModal] = useState(false);
+  const [passData, setPassData] = useState({ current: "", new: "", confirm: "" });
+  const [passLoading, setPassLoading] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -29,6 +33,31 @@ export function MyTeam() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passData.new !== passData.confirm) {
+        toast.error("New passwords do not match");
+        return;
+    }
+    setPassLoading(true);
+    try {
+        await fetchApi('/team/change-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                currentPassword: passData.current,
+                newPassword: passData.new
+            })
+        });
+        toast.success("Password updated successfully!");
+        setShowPassModal(false);
+        setPassData({ current: "", new: "", confirm: "" });
+    } catch (err: any) {
+        toast.error(err.message || "Failed to update password");
+    } finally {
+        setPassLoading(false);
     }
   };
 
@@ -259,8 +288,97 @@ export function MyTeam() {
                 </div>
               </div>
             </section>
+
+            {/* Security Section */}
+            <section className="glass-card p-8 rounded-[3rem] border border-white/5 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
+                        <Key className="w-6 h-6 text-red-400" />
+                    </div>
+                    <h4 className="text-lg font-black text-white tracking-tight">Security & Access</h4>
+                </div>
+                <button 
+                    onClick={() => setShowPassModal(true)}
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-widest transition-all"
+                >
+                    Change Password
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium">Protect your portal access by using a strong, unique password for your team leader account.</p>
+            </section>
           </div>
         </div>
+
+        {/* Change Password Modal */}
+        <AnimatePresence>
+            {showPassModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                    <motion.div 
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        onClick={() => setShowPassModal(false)}
+                        className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm"
+                    />
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="relative w-full max-w-md bg-[#0F172A] border border-white/5 rounded-[2.5rem] shadow-2xl p-10 overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-6">
+                            <button onClick={() => setShowPassModal(false)} className="text-slate-500 hover:text-white transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col items-center text-center mb-10">
+                            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mb-6 border border-primary/20">
+                                <ShieldAlert className="w-8 h-8 text-primary" />
+                            </div>
+                            <h3 className="text-2xl font-black text-white uppercase tracking-tight">Change Password</h3>
+                            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-2">Team Leader Security</p>
+                        </div>
+
+                        <form onSubmit={handleChangePassword} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Current Password</label>
+                                <input 
+                                    type="password" required
+                                    value={passData.current}
+                                    onChange={(e) => setPassData({...passData, current: e.target.value})}
+                                    className="w-full bg-slate-950 border border-white/5 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">New Password</label>
+                                <input 
+                                    type="password" required
+                                    value={passData.new}
+                                    onChange={(e) => setPassData({...passData, new: e.target.value})}
+                                    className="w-full bg-slate-950 border border-white/5 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Confirm New Password</label>
+                                <input 
+                                    type="password" required
+                                    value={passData.confirm}
+                                    onChange={(e) => setPassData({...passData, confirm: e.target.value})}
+                                    className="w-full bg-slate-950 border border-white/5 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                />
+                            </div>
+
+                            <button 
+                                type="submit" disabled={passLoading}
+                                className="w-full py-5 bg-primary text-white rounded-[2rem] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                            >
+                                {passLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Update Password <Save className="w-4 h-4" /></>}
+                            </button>
+                        </form>
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
       </div>
     </TeamLeaderLayout>
   );

@@ -7,6 +7,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendEmail } = require('../utils/emailService');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 // --- FIREBASE ADMIN (Google Auth Verification) ---
 const admin = require('firebase-admin');
@@ -138,13 +140,24 @@ router.get('/public-events', async (req, res) => {
 
 
 // --- TEAM LEADER REGISTRATION ---
-router.post('/register/team-leader', async (req, res) => {
+router.post('/register/team-leader', upload.single('paymentReceipt'), async (req, res) => {
+    let registrationData;
+    try {
+        // If data is sent as multipart/form-data, it might be in strings
+        registrationData = req.body;
+        if (typeof registrationData.members === 'string') {
+            registrationData.members = JSON.parse(registrationData.members);
+        }
+    } catch (err) {
+        return res.status(400).json({ message: 'Invalid form data' });
+    }
+
     const {
         teamName, phone,
         name, email, password, year, department,
         collegeType, residenceType, hostelNumber, collegeName, regNo,
-        paymentReference, members, eventId // eventId is the string ID like 'hackathon-2026'
-    } = req.body;
+        paymentReference, members, eventId
+    } = registrationData;
 
     try {
         const event = await Event.findOne({ eventId });
@@ -246,6 +259,15 @@ router.post('/register/team-leader', async (req, res) => {
             }
         }
 
+        let leaderFaceDescriptors = undefined;
+        if (registrationData.faceDescriptors) {
+            try {
+                leaderFaceDescriptors = JSON.parse(registrationData.faceDescriptors);
+            } catch (err) {
+                console.error("Failed to parse face descriptors");
+            }
+        }
+
         const newTeam = new Team({
             teamId: uniqueId,
             teamName: teamName || `${name}'s Team`,
@@ -255,12 +277,14 @@ router.post('/register/team-leader', async (req, res) => {
                 {
                     name, email, regNo, phone, year, department, collegeType, collegeName,
                     residenceType: collegeType === 'KARE' ? residenceType : undefined,
-                    hostelNumber: (collegeType === 'KARE' && residenceType === 'Hostler') ? hostelNumber : undefined
+                    hostelNumber: (collegeType === 'KARE' && residenceType === 'Hostler') ? hostelNumber : undefined,
+                    faceDescriptors: leaderFaceDescriptors
                 },
                 ...(members || [])
             ],
             paymentStatus: settings.isPaidEvent ? 'Pending' : 'Free',
-            paymentReference: paymentReference || undefined
+            paymentReference: paymentReference || undefined,
+            paymentReceipt: req.file ? `/uploads/${req.file.filename}` : undefined
         });
 
         await newTeam.save();
@@ -268,7 +292,8 @@ router.post('/register/team-leader', async (req, res) => {
         try {
             const emailPromises = newTeam.members.map(member => {
                 if (member.email) {
-                    const faceScanLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/face-register?teamId=${uniqueId}&email=${encodeURIComponent(member.email)}`;
+                    const baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+                    const faceScanLink = `${baseUrl}/face-register?teamId=${uniqueId}&email=${encodeURIComponent(member.email)}`;
                     
                     let whatsappSection = '';
                     if (settings.whatsappLink) {
@@ -461,7 +486,8 @@ router.post('/forgot-password', async (req, res) => {
         await user.save();
 
         // Send Email (Fire and forget to speed up response)
-        const resetUrl = `${process.env.FRONTEND_URL || 'https://neos-chi.vercel.app'}/reset-password/${resetToken}`;
+        const baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+        const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
         const emailHtml = `
             <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                 <div style="background-color: #6366f1; padding: 32px 20px; text-align: center;">

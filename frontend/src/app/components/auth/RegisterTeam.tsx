@@ -7,7 +7,8 @@ import {
     Banknote, Info, ExternalLink, RefreshCw, Trophy
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router';
-import { fetchApi } from "../../utils/api";
+import { fetchApi, API_BASE_URL } from "../../utils/api";
+import { FaceScanner } from '../shared/FaceScanner';
 
 const RegisterTeam: React.FC = () => {
     const [step, setStep] = useState(1); // Start directly at step 1 — mode is set by admin
@@ -30,6 +31,9 @@ const RegisterTeam: React.FC = () => {
         hostelNumber: '',
         paymentReference: '',
     });
+
+    const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
+    const [faceDescriptors, setFaceDescriptors] = useState<number[][] | null>(null);
 
     const [members, setMembers] = useState<any[]>([]);
     const [participationMode, setParticipationMode] = useState<'solo' | 'team'>('team');
@@ -127,19 +131,54 @@ const RegisterTeam: React.FC = () => {
 
         setLoading(true);
         try {
-            const payload = {
-                ...formData,
-                teamName: participationMode === 'solo' ? `${formData.name}'s Registration` : formData.teamName,
-                eventId: settings?.eventId,
-                members: participationMode === 'solo' ? [] : members // Ensure no members for solo
-            };
+            const data = new FormData();
+            data.append('teamName', participationMode === 'solo' ? formData.name + "'s Registration" : formData.teamName);
+            data.append('name', formData.name);
+            data.append('email', formData.email);
+            data.append('phone', formData.phone);
+            data.append('password', formData.password);
+            data.append('regNo', formData.regNo);
+            data.append('year', formData.year);
+            data.append('department', formData.department);
+            data.append('collegeType', formData.collegeType);
+            data.append('collegeName', formData.collegeName);
+            data.append('residenceType', formData.residenceType);
+            if (formData.hostelNumber) data.append('hostelNumber', formData.hostelNumber);
+            data.append('paymentReference', formData.paymentReference);
+            data.append('eventId', settings?.eventId);
+            
+            // For members, we need to handle them as a JSON string since it's multipart
+            const membersWithFace = [...members];
+            // Add face descriptors to the leader (first member)
+            if (faceDescriptors) {
+                // In the backend, the first member is the leader
+                // But the members array here only contains extra members.
+                // The backend adds the leader at index 0.
+                // We'll send faceDescriptors separately or handle it.
+                // Let's add faceDescriptors to the leader data in backend.
+            }
+            data.append('members', JSON.stringify(members));
+            
+            if (paymentReceipt) {
+                data.append('paymentReceipt', paymentReceipt);
+            }
 
-            const response = await fetchApi('/auth/register/team-leader', {
+            // Also send face descriptors if captured
+            if (faceDescriptors) {
+                data.append('faceDescriptors', JSON.stringify(faceDescriptors));
+            }
+
+            const response = await fetch(`${API_BASE_URL}/auth/register/team-leader`, {
                 method: 'POST',
-                body: JSON.stringify(payload),
+                body: data,
             });
 
-            if (response) {
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || "Registration failed");
+            }
+
+            const regResult = await response.json();
                 // Auto-login after successful registration
                 try {
                     const loginResponse = await fetchApi('/auth/login', {
@@ -160,7 +199,6 @@ const RegisterTeam: React.FC = () => {
                     console.error("Auto-login failed:", loginErr);
                     setStep(4); // Still show success, user can login manually
                 }
-            }
         } catch (err: any) {
             alert(err.message || "Registration failed. Please try again.");
         } finally {
@@ -667,9 +705,43 @@ const RegisterTeam: React.FC = () => {
                                         <div className="flex gap-4 pt-8">
                                             <button type="button" onClick={() => setStep(2)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all">BACK</button>
                                             <button
-                                                type={"button"}
+                                                type="button"
+                                                onClick={() => setStep(3.2)}
+                                                className="flex-1 bg-primary text-white font-black text-lg rounded-2xl shadow-lg transition-all transform hover:-translate-y-1"
+                                            >
+                                                CONTINUE TO FACE ID
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {step === 3.2 && (
+                                    <motion.div
+                                        key="stepFace"
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        className="space-y-8"
+                                    >
+                                        <div className="space-y-2">
+                                            <h2 className="text-2xl font-black text-white flex items-center gap-3">
+                                                <Camera className="w-6 h-6 text-primary" />
+                                                Face ID Registration
+                                            </h2>
+                                            <p className="text-slate-500 text-sm">Register your face for automated attendance during the event.</p>
+                                        </div>
+
+                                        <div className="p-6 bg-slate-900/50 border border-white/5 rounded-[2.5rem]">
+                                            <FaceScanner onComplete={(descriptors) => setFaceDescriptors(descriptors)} />
+                                        </div>
+
+                                        <div className="flex gap-4 pt-4">
+                                            <button type="button" onClick={() => setStep(participationMode === 'solo' ? 2 : 3)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all">BACK</button>
+                                            <button
+                                                type="button"
+                                                disabled={!faceDescriptors}
                                                 onClick={() => settings.isPaidEvent ? setStep(3.5) : handleRegister({ preventDefault: () => { } } as any)}
-                                                className="flex-1 bg-emerald-500 text-white font-black text-lg rounded-2xl shadow-[0_10px_30px_rgba(16,185,129,0.3)] transition-all transform hover:-translate-y-1"
+                                                className="flex-1 bg-emerald-500 text-white font-black text-lg rounded-2xl shadow-lg transform hover:-translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
                                             >
                                                 {settings.isPaidEvent ? "PROCEED TO PAYMENT" : "REGISTER NOW"}
                                             </button>
@@ -691,10 +763,14 @@ const RegisterTeam: React.FC = () => {
                                                 <span className="text-yellow-500 text-[10px] font-black uppercase tracking-widest">Payment Required</span>
                                             </div>
                                             <h2 className="text-3xl font-black text-white">Payment Details</h2>
-                                            <p className="text-slate-500 font-bold text-2xl mt-2 tracking-tighter">Amount: <span className="text-white">₹{settings.registrationFee}</span></p>
+                                            <div className="flex flex-col items-center gap-1 mt-2">
+                                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Total Amount Payable</p>
+                                                <p className="text-4xl font-black text-white tracking-tighter">₹{(settings.registrationFee * (members.length + 1)).toLocaleString()}</p>
+                                                <p className="text-[10px] text-slate-500 font-bold">({settings.registrationFee} × {members.length + 1} participants)</p>
+                                            </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/50 p-8 rounded-[2rem] border border-white/5 border-dashed">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/50 p-6 rounded-[2rem] border border-white/5 border-dashed">
                                             <div className="space-y-4">
                                                 <div className="flex items-center gap-2">
                                                     <QrCode className="w-5 h-5 text-primary" />
@@ -705,36 +781,46 @@ const RegisterTeam: React.FC = () => {
                                                     <p className="font-bold text-white text-lg tracking-wider">{settings.paymentDetails?.upiId || "EVENT@UPI"}</p>
                                                 </div>
                                             </div>
-                                            <div className="space-y-4">
+                                            <div className="space-y-3">
                                                 <div className="flex items-center gap-2">
                                                     <ExternalLink className="w-5 h-5 text-accent" />
                                                     <h3 className="text-sm font-black text-white uppercase tracking-widest">Instructions</h3>
                                                 </div>
-                                                <ul className="text-[11px] text-slate-400 space-y-2 font-medium list-disc ml-4">
-                                                    <li>Transfer amount via any UPI app</li>
+                                                <ul className="text-[10px] text-slate-400 space-y-1 font-medium list-disc ml-4">
+                                                    <li>Transfer exact amount via UPI</li>
                                                     <li>Capture screenshot of success</li>
-                                                    <li>Paste Transaction ID below</li>
+                                                    <li>Upload receipt & enter TXN ID</li>
                                                 </ul>
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Transaction ID (TXN ID)</label>
-                                            <input
-                                                type="text" required placeholder="TXN-123456789"
-                                                value={formData.paymentReference}
-                                                onChange={(e) => setFormData({ ...formData, paymentReference: e.target.value })}
-                                                className="w-full bg-slate-900 border-2 border-primary/20 rounded-2xl py-5 px-6 text-white font-black text-xl text-center focus:outline-none focus:border-primary transition-all"
-                                            />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Transaction ID (TXN ID)</label>
+                                                <input
+                                                    type="text" required placeholder="TXN-123456789"
+                                                    value={formData.paymentReference}
+                                                    onChange={(e) => setFormData({ ...formData, paymentReference: e.target.value })}
+                                                    className="w-full bg-slate-900 border border-white/5 rounded-2xl py-4 px-6 text-white font-bold focus:outline-none focus:border-primary transition-all text-sm"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Payment Receipt (Image)</label>
+                                                <input
+                                                    type="file" required accept="image/*"
+                                                    onChange={(e) => setPaymentReceipt(e.target.files?.[0] || null)}
+                                                    className="w-full bg-slate-900 border border-white/5 rounded-2xl py-3.5 px-6 text-white text-[10px] focus:outline-none focus:border-primary transition-all"
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="flex gap-4 pt-4">
-                                            <button type="button" onClick={() => setStep(3)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all">BACK</button>
+                                            <button type="button" onClick={() => setStep(3.2)} className="px-8 py-5 rounded-2xl border border-white/5 text-slate-500 font-bold hover:text-white transition-all">BACK</button>
                                             <button
-                                                onClick={handleRegister} disabled={loading || !formData.paymentReference}
-                                                className="flex-1 bg-emerald-500 text-white font-black text-lg rounded-2xl shadow-lg transform hover:-translate-y-1 transition-all"
+                                                onClick={handleRegister} disabled={loading || !formData.paymentReference || !paymentReceipt}
+                                                className="flex-1 bg-emerald-500 text-white font-black text-lg rounded-2xl shadow-lg transform hover:-translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
                                             >
-                                                {loading ? <Loader2 className="animate-spin h-6 w-6 mx-auto" /> : "SUBMIT"}
+                                                {loading ? <Loader2 className="animate-spin h-6 w-6 mx-auto" /> : "COMPLETE REGISTRATION"}
                                             </button>
                                         </div>
                                     </motion.div>

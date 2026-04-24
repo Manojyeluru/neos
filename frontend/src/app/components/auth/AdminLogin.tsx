@@ -3,6 +3,9 @@ import { useNavigate } from "react-router";
 import { Lock, Settings, ShieldCheck, Trophy, ArrowLeft } from "lucide-react";
 import { fetchApi } from "../../utils/api";
 import { motion } from "framer-motion";
+import { auth, googleProvider } from "../../firebase";
+import { signInWithPopup } from "firebase/auth";
+import { toast } from "sonner";
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -29,6 +32,28 @@ export function AdminLogin() {
       }
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      
+      const data = await fetchApi("/auth/google-login", {
+        method: "POST",
+        body: JSON.stringify({ idToken, role: "admin" }),
+      });
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success("Coordinator login successful!");
+      navigate("/admin/dashboard");
+    } catch (err: any) {
+      toast.error(err.message || "Google login failed.");
     } finally {
       setLoading(false);
     }
@@ -149,6 +174,26 @@ export function AdminLogin() {
               {loading ? "Logging in..." : "Login"}
             </button>
           </form>
+
+          <div className="mt-8">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/5"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
+                <span className="bg-[#0B0F19] px-4 text-slate-600">Administrative Auth</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="w-full py-5 bg-white/[0.03] border border-white/5 text-white rounded-[2rem] font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.08] transition-all flex items-center justify-center gap-3 group shadow-xl"
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+              Continue with Google
+            </button>
+          </div>
 
           <footer className="mt-12 text-center space-y-6">
             <div className="h-[1px] bg-white/5 w-1/2 mx-auto" />

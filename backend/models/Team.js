@@ -41,6 +41,7 @@ const TeamSchema = new mongoose.Schema({
     }],
     paymentStatus: { type: String, enum: ['Free', 'Pending', 'Verified', 'Rejected'], default: 'Free' },
     paymentReference: { type: String },
+    paymentReceipt: { type: String }, // URL to the screenshot
     status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' }
 }, { timestamps: true });
 

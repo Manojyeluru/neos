@@ -46,6 +46,7 @@ interface Team {
   status?: string;
   paymentStatus?: string;
   paymentReference?: string;
+  paymentReceipt?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -658,16 +659,22 @@ function TeamDetailsModal({
   team,
   onClose,
   onStatusChange,
+  onPaymentChange,
   onEditOpen,
 }: {
   team: Team;
   onClose: () => void;
   onStatusChange: (id: string, status: string) => void;
+  onPaymentChange: (id: string, status: string) => void;
   onEditOpen: () => void;
 }) {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [updatingPayment, setUpdatingPayment] = useState<string | null>(null);
   const [localPaymentStatus, setLocalPaymentStatus] = useState(team.paymentStatus || 'Free');
+
+  useEffect(() => {
+    setLocalPaymentStatus(team.paymentStatus || 'Free');
+  }, [team.paymentStatus]);
 
   const handleStatus = async (status: string) => {
     if (!team._id) return;
@@ -694,8 +701,11 @@ function TeamDetailsModal({
         body: JSON.stringify({ paymentStatus }),
       });
       setLocalPaymentStatus(paymentStatus);
-    } catch (err) {
+      onPaymentChange(team._id, paymentStatus);
+      toast.success(`Payment status updated to ${paymentStatus}`);
+    } catch (err: any) {
       console.error(err);
+      toast.error(err.message || "Failed to update payment status");
     } finally {
       setUpdatingPayment(null);
     }
@@ -803,6 +813,18 @@ function TeamDetailsModal({
                   <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Status</div>
                 </div>
               </div>
+              {team.paymentReceipt && (
+                <div className="mb-4">
+                  <a 
+                    href={`${API_BASE_URL.replace('/api', '')}${team.paymentReceipt}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-primary" /> View Payment Receipt
+                  </a>
+                </div>
+              )}
               {localPaymentStatus !== 'Free' && (
                 <div className="flex gap-2 mt-2">
                   <button
@@ -1458,6 +1480,10 @@ export function TeamsOverview() {
             onStatusChange={(id, status) => {
               setTeams((prev) => prev.map((t) => (t._id === id ? { ...t, status } : t)));
               setSelectedTeam((prev) => prev ? { ...prev, status } : prev);
+            }}
+            onPaymentChange={(id, paymentStatus) => {
+              setTeams((prev) => prev.map((t) => (t._id === id ? { ...t, paymentStatus } : t)));
+              setSelectedTeam((prev) => (prev ? { ...prev, paymentStatus } : prev));
             }}
             onEditOpen={() => {
               setEditModalTeam(selectedTeam);

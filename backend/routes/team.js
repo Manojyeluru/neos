@@ -101,4 +101,27 @@ router.post('/upload-project', async (req, res) => {
     }
 });
 
+// Change Password
+router.post('/change-password', async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    try {
+        const User = require('../models/User');
+        const bcrypt = require('bcryptjs');
+        
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) return res.status(400).json({ message: 'Current password incorrect' });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 module.exports = router;

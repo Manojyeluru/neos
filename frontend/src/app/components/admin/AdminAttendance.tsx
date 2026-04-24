@@ -158,17 +158,66 @@ export function AdminAttendance() {
         }, 3000); // Check every 3 seconds to save CPU
     };
 
+    const runManualScan = async () => {
+        if (!faceMatcher.current || !videoRef.current || !canvasRef.current) return;
+        
+        setMessage("Scanning face patterns...");
+        const detections = await faceapi.detectAllFaces(videoRef.current)
+            .withFaceLandmarks()
+            .withFaceDescriptors();
+
+        const displaySize = { width: videoRef.current.width, height: videoRef.current.height };
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        const ctx = canvasRef.current.getContext('2d');
+        ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        faceapi.draw.drawDetections(canvasRef.current, resizedDetections);
+
+        const detectedEmails: string[] = [];
+        resizedDetections.forEach(d => {
+            const bestMatch = faceMatcher.current!.findBestMatch(d.descriptor);
+            if (bestMatch.label !== 'unknown') {
+                detectedEmails.push(bestMatch.label);
+                const box = d.detection.box;
+                new faceapi.draw.DrawBox(box, { label: 'MATCH: ' + bestMatch.label }).draw(canvasRef.current!);
+            }
+        });
+
+        if (detectedEmails.length > 0) {
+            await fetchApi('/attendance/bulk-face-checkin', {
+                method: 'POST',
+                body: JSON.stringify({ emails: detectedEmails })
+            });
+            refreshStats();
+            setMessage(`${detectedEmails.length} participants identified!`);
+        } else {
+            setMessage("No recognized faces found in frame.");
+        }
+    };
+
     const handleManualCheckIn = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await fetchApi('/attendance/manual-checkin', {
+            await fetchApi('/attendance/manual-toggle-status', {
                 method: "POST",
-                body: JSON.stringify({ regNo: manualRegNo })
+                body: JSON.stringify({ regNo: manualRegNo, status: true })
             });
             setManualRegNo("");
             refreshStats();
+            setMessage("Manually verified: " + manualRegNo);
         } catch (err: any) {
             alert(err.message || "Manual check-in failed.");
+        }
+    };
+
+    const toggleStatus = async (regNo: string, currentStatus: boolean) => {
+        try {
+            await fetchApi('/attendance/manual-toggle-status', {
+                method: "POST",
+                body: JSON.stringify({ regNo, status: !currentStatus })
+            });
+            refreshStats();
+        } catch (err: any) {
+            alert(err.message || "Failed to update status.");
         }
     };
 
@@ -208,6 +257,14 @@ export function AdminAttendance() {
                             className="formal-btn bg-red-500/20 text-red-500 hover:bg-red-500/30 font-black uppercase tracking-widest text-[10px] rounded-xl px-6 flex items-center gap-2"
                         >
                             STOP STREAM <X className="w-3 h-3" />
+                        </button>
+                    )}
+                    {status === 'active' && (
+                        <button 
+                            onClick={runManualScan}
+                            className="formal-btn bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] rounded-xl px-6 flex items-center gap-2 shadow-lg shadow-primary/20"
+                        >
+                            SCAN NOW <Camera className="w-3 h-3" />
                         </button>
                     )}
                 </div>
@@ -288,11 +345,32 @@ export function AdminAttendance() {
                                         <p className="text-emerald-400 font-bold text-xs">{p.name}</p>
                                         <p className="text-emerald-500/60 font-mono text-[9px]">{p.regNo}</p>
                                     </div>
-                                    <CheckCircle className="w-4 h-4 text-emerald-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                    <button 
+                                        onClick={() => toggleStatus(p.regNo, true)}
+                                        title="Mark as Absent"
+                                        className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 hover:bg-red-500 hover:text-white transition-all shadow-inner"
+                                    >
+                                        <CheckCircle className="w-4 h-4" />
+                                    </button>
                                 </div>
                             ))}
-                            {stats.present.length === 0 && (
-                                <p className="text-center text-slate-600 text-[10px] font-black uppercase tracking-widest italic py-4">No verified profiles.</p>
+                            {stats.absent.map((p, i) => (
+                                <div key={i} className="bg-red-500/5 border border-red-500/10 p-3 rounded-xl flex justify-between items-center group opacity-80">
+                                    <div>
+                                        <p className="text-red-400 font-bold text-xs">{p.name}</p>
+                                        <p className="text-red-500/60 font-mono text-[9px]">{p.regNo}</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => toggleStatus(p.regNo, false)}
+                                        title="Mark as Present"
+                                        className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 hover:bg-emerald-500 hover:text-white transition-all shadow-inner"
+                                    >
+                                        <XCircle className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            {stats.present.length === 0 && stats.absent.length === 0 && (
+                                <p className="text-center text-slate-600 text-[10px] font-black uppercase tracking-widest italic py-4">No profiles found.</p>
                             )}
                         </div>
                     </div>

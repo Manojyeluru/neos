@@ -32,10 +32,24 @@ router.get('/events', async (req, res) => {
             const teamsCount = await Team.countDocuments({ eventId: event._id });
             const teams = await Team.find({ eventId: event._id });
             const participantsCount = teams.reduce((sum, t) => sum + (t.members?.length || 0), 0);
+            
+            // Calculate total generated amount
+            // If the fee is per participant (suggested by user request), we multiply.
+            // For now, let's assume registrationFee is per team if not specified, 
+            // but the user wants "based on participants". 
+            // Let's calculate it both ways or just use the fee * participants if that's the intent.
+            // Actually, usually it's per team. But user said "read the amount based on participants".
+            // So if fee is 100 and 5 members, it's 500.
+            const totalGeneratedAmount = teams.reduce((sum, t) => {
+                const fee = event.settings?.registrationFee || 0;
+                return sum + (fee * (t.members?.length || 1));
+            }, 0);
+
             return {
                 ...event,
                 teamsCount,
-                participantsCount
+                participantsCount,
+                totalGeneratedAmount
             };
         }));
 
@@ -53,7 +67,15 @@ router.post('/events', eventUpload, async (req, res) => {
         if (name !== undefined) updateData.name = name;
         if (description !== undefined) updateData.description = description;
         if (venue !== undefined) updateData.venue = venue;
-        if (parsedSettings !== undefined) updateData.settings = parsedSettings;
+        
+        if (parsedSettings !== undefined) {
+            // Ensure registrationFee is a number and not NaN
+            if (parsedSettings.registrationFee !== undefined) {
+                const fee = parseFloat(parsedSettings.registrationFee);
+                parsedSettings.registrationFee = isNaN(fee) ? 0 : fee;
+            }
+            updateData.settings = parsedSettings;
+        }
         
         // Only include dates if they are provided (prevent null/invalid date conversion if empty)
         if (startDate) updateData.startDate = startDate;

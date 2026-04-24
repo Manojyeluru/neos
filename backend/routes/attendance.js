@@ -1,4 +1,4 @@
-const express = require('mongoose');
+const mongoose = require('mongoose');
 const router = require('express').Router();
 const Team = require('../models/Team');
 const Event = require('../models/Event');
@@ -181,6 +181,27 @@ router.get('/list', authMiddleware(['admin', 'coordinator']), async (req, res) =
         });
 
         res.json({ present, absent });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// --- ADMIN CONTROL: MANUAL TOGGLE STATUS ---
+router.post('/manual-toggle-status', authMiddleware(['admin', 'coordinator']), async (req, res) => {
+    try {
+        const { regNo, status } = req.body; // status = true or false
+        if (!regNo) return res.status(400).json({ message: 'Registration number required' });
+
+        const team = await Team.findOne({ 'members.regNo': regNo, eventId: req.event?._id });
+        if (!team) return res.status(404).json({ message: 'Participant not found' });
+
+        const memberIndex = team.members.findIndex(m => m.regNo === regNo);
+        if (memberIndex === -1) return res.status(404).json({ message: 'Participant member error' });
+
+        team.members[memberIndex].isPresent = status;
+        await team.save();
+
+        res.json({ message: `Marked ${status ? 'Present' : 'Absent'} successfully`, member: team.members[memberIndex] });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
