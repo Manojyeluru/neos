@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { Lock, Settings, ShieldCheck, Trophy, ArrowLeft } from "lucide-react";
 import { fetchApi } from "../../utils/api";
 import { motion } from "framer-motion";
-import { auth, googleProvider } from "../../firebase";
+import { auth, googleProvider } from "../../../firebase";
 import { signInWithPopup } from "firebase/auth";
 import { toast } from "sonner";
 

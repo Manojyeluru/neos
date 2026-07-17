@@ -43,7 +43,7 @@ export function FaceScanner({ onComplete, label = "Team Leader" }: FaceScannerPr
     }, []);
 
     const startVideo = () => {
-        navigator.mediaDevices.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
             .then((stream) => {
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;

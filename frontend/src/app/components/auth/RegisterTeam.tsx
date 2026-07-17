@@ -4,7 +4,8 @@ import {
     User, Mail, Lock, School, Building, Home,
     ArrowRight, ArrowLeft, CheckCircle2, Loader2,
     Users, CreditCard, QrCode, ShieldAlert,
-    Banknote, Info, ExternalLink, RefreshCw, Trophy
+    Banknote, Info, ExternalLink, RefreshCw, Trophy,
+    Camera
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router';
 import { fetchApi, API_BASE_URL } from "../../utils/api";
@@ -263,16 +264,16 @@ const RegisterTeam: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center p-3 xs:p-4 sm:p-6 bg-background relative overflow-hidden">
 
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-card w-full max-w-4xl rounded-[3rem] overflow-hidden shadow-2xl relative z-10"
+                className="glass-card w-full max-w-4xl rounded-2xl sm:rounded-[3rem] overflow-hidden shadow-2xl relative z-10"
             >
                 <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[600px]">
                     {/* Left Panel - Progress & Info */}
-                    <div className="lg:col-span-4 bg-primary/20 backdrop-blur-3xl p-8 border-r border-white/5 flex flex-col justify-between relative overflow-hidden">
+                    <div className="lg:col-span-4 bg-primary/20 backdrop-blur-3xl p-5 sm:p-8 border-r border-white/5 flex flex-col justify-between relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
 
                         <div className="relative z-10">
@@ -322,7 +323,7 @@ const RegisterTeam: React.FC = () => {
                     </div>
 
                     {/* Right Panel - Form Fields */}
-                    <div className="lg:col-span-8 p-8 bg-white/[0.01]">
+                    <div className="lg:col-span-8 p-5 sm:p-8 bg-white/[0.01]">
                         <form onSubmit={handleRegister} className="h-full flex flex-col justify-between">
                             <AnimatePresence mode="wait">
                                 {/* Step 0 removed — registration type is set by the admin, not chosen by participants */}
@@ -731,7 +732,7 @@ const RegisterTeam: React.FC = () => {
                                             <p className="text-slate-500 text-sm">Register your face for automated attendance during the event.</p>
                                         </div>
 
-                                        <div className="p-6 bg-slate-900/50 border border-white/5 rounded-[2.5rem]">
+                                        <div className="p-4 sm:p-6 bg-slate-900/50 border border-white/5 rounded-2xl sm:rounded-[2.5rem]">
                                             <FaceScanner onComplete={(descriptors) => setFaceDescriptors(descriptors)} />
                                         </div>
 

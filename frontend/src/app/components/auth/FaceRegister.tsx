@@ -48,7 +48,7 @@ export function FaceRegister() {
     }, [teamId, email]);
 
     const startVideo = () => {
-        navigator.mediaDevices.getUserMedia({ video: true })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
             .then((stream) => {
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
@@ -129,18 +129,18 @@ export function FaceRegister() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white font-sans selection:bg-primary selection:text-white pb-32">
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 sm:p-6 text-white font-sans selection:bg-primary selection:text-white pb-10">
             <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+                className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-2xl relative overflow-hidden"
             >
                 <div className="text-center space-y-2 mb-8 relative z-10">
                     <div className="mx-auto w-12 h-12 bg-primary/20 text-primary rounded-xl flex items-center justify-center mb-4 border border-primary/30">
                         <ShieldCheck className="w-6 h-6" />
                     </div>
                     <h1 className="text-2xl font-black uppercase tracking-tight">Face ID <span className="text-primary">Scanner</span></h1>
-                    <p className="text-slate-400 text-xs font-bold w-3/4 mx-auto leading-relaxed">
+                    <p className="text-slate-400 text-xs font-bold w-full sm:w-3/4 mx-auto leading-relaxed">
                         Securely register your biometric identity for instant attendance at the technical symposium.
                     </p>
                 </div>

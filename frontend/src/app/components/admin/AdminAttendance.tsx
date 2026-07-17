@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import * as faceapi from 'face-api.js';
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, CheckCircle, Clock, Search, List, ShieldCheck, X } from "lucide-react";
+import { Camera, CheckCircle, Clock, Search, List, ShieldCheck, X, XCircle } from "lucide-react";
 import { fetchApi } from "../../utils/api";
 
 type FaceProfile = {
