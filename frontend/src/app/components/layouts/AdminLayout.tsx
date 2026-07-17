@@ -283,34 +283,6 @@ export function AdminLayout({ children }: LayoutProps) {
         </main>
       </div>
 
-      {/* ── Mobile Bottom Nav ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0F172A]/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-1 py-1">
-        {bottomNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all"
-            >
-              <div className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-all ${isActive ? "bg-primary/15 border border-primary/30" : ""}`}>
-                <Icon className={`w-5 h-5 ${isActive ? "text-primary" : "text-slate-500"}`} />
-              </div>
-              <span className={`text-[9px] font-black uppercase tracking-wider ${isActive ? "text-primary" : "text-slate-600"}`}>{item.label}</span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl"
-        >
-          <div className="w-10 h-10 flex items-center justify-center rounded-2xl">
-            <Menu className="w-5 h-5 text-slate-500" />
-          </div>
-          <span className="text-[9px] font-black uppercase tracking-wider text-slate-600">More</span>
-        </button>
-      </nav>
 
     </div>
   );
