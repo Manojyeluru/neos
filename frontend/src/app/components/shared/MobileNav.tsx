@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router";
-import { LayoutDashboard, Users, User, Settings, FolderKanban, Camera, Upload } from "lucide-react";
+import { LayoutDashboard, Users, User, Settings, FolderKanban } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function MobileNav() {
@@ -17,7 +17,6 @@ export function MobileNav() {
                     { icon: LayoutDashboard, label: 'Dash', path: '/admin/dashboard' },
                     { icon: Users, label: 'Teams', path: '/admin/teams' },
                     { icon: FolderKanban, label: 'Problems', path: '/admin/problems' },
-                    { icon: Camera, label: 'Attend', path: '/admin/attendance' },
                     { icon: Settings, label: 'Setup', path: '/admin/settings' },
                 ];
             case 'teamleader':
@@ -25,7 +24,6 @@ export function MobileNav() {
                     { icon: LayoutDashboard, label: 'Dash', path: '/teamleader/dashboard' },
                     { icon: FolderKanban, label: 'Problems', path: '/teamleader/problems' },
                     { icon: User, label: 'My Team', path: '/teamleader/my-team' },
-                    { icon: Upload, label: 'Upload', path: '/teamleader/project-upload' },
                 ];
             case 'reviewer':
                 return [
