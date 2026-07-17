@@ -1,5 +1,4 @@
 import { Outlet, ScrollRestoration } from "react-router";
-import { MobileNav } from "./MobileNav";
 import { PageTransition } from "./PageTransition";
 import { AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router";
@@ -21,7 +20,6 @@ export function Shell() {
             </AnimatePresence>
 
             {/* Floating App-like Navigation for Mobile */}
-            <MobileNav />
 
             {/* Modern Background Gradient (Flutter High Fidelity Style) */}
             <div className="fixed inset-0 -z-50 overflow-hidden pointer-events-none opacity-40">
